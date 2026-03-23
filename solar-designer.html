@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <title>SolarEco | Solar System Designer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        /* ملاحظات للستايل 
+        تخلص من البطاقات الاضافية 
+        scroll to expanded card */
+
+        :root {
+            --primary: #DC8623;
+            --primary-dark: #b56c1c;
+            --primary-light: #f0a450;
+            --secondary: #2E438F;
+            --secondary-dark: #1f2f63;
+            --bg-dark: #0B1120;
+            --surface: #111827;
+            --surface-light: #1F2937;
+            --surface-lighter: #2D3A4F;
+            --text-primary: #F3F4F6;
+            --text-secondary: #9CA3AF;
+            --success: #10B981;
+            --danger: #EF4444;
+            --warning: #F59E0B;
+            --info: #3B82F6;
+            --border: #2D3A4F;
+            --transition: all 0.2s ease;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        body.rtl {
+            direction: rtl;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            background: var(--surface);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-shadow: 0 0 40px rgba(0,0,0,0.5);
+            overflow-x: hidden;
+        }
+
+        .header {
+            background: var(--primary);
+            padding: 18px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom-left-radius: 24px;
+            border-bottom-right-radius: 24px;
+            box-shadow: 0 6px 14px rgba(0,0,0,0.3);
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .back-button {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 30px;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .back-button:active {
+            transform: scale(0.95);
+            background: rgba(255,255,255,0.3);
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="%23FFFFFF"/><polygon points="50,20 60,40 80,45 65,60 68,80 50,70 32,80 35,60 20,45 40,40 50,20" fill="%23DC8623"/><circle cx="50" cy="50" r="12" fill="%23FFB347"/></svg>');
+            background-size: contain;
+            background-repeat: no-repeat;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+        }
+
+        .logo-area h1 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            color: white;
+        }
+
+        .lang-toggle {
+            background: var(--secondary);
+            border: none;
+            width: 42px;
+            height: 42px;
+            border-radius: 30px;
+            color: white;
+            font-size: 1.3rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .lang-toggle:active {
+            transform: scale(0.96);
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 20px 18px;
+            overflow-y: auto;
+            padding-bottom: 80px;
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            max-width: 500px;
+            width: 100%;
+            background: var(--surface-light);
+            display: flex;
+            justify-content: space-around;
+            border-top: 1px solid var(--border);
+            padding: 8px 12px 12px;
+            z-index: 20;
+            border-radius: 28px 28px 0 0;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            font-weight: 500;
+            transition: var(--transition);
+            cursor: pointer;
+            padding: 6px 12px;
+            border-radius: 40px;
+            flex: 1;
+        }
+
+        .nav-item i {
+            font-size: 1.6rem;
+        }
+
+        .nav-item.active {
+            color: var(--primary);
+            background: rgba(220,134,35,0.15);
+        }
+
+        .steps-container {
+            position: fixed;
+            bottom: 0;
+            right: 0;
+            /* max-width: 500px; */
+            width: 100%;
+            background: var(--surface-light);
+            display: flex;
+            justify-content: space-around;
+            border-top: 1px solid var(--border);
+            padding: 8px 12px 12px;
+            z-index: 20;
+            border-radius: 28px 28px 0 0;
+        }
+
+        .step {
+            flex: 1;
+            text-align: center;
+            padding: 8px 4px;
+            border-radius: 32px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .step.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .step.completed {
+            color: var(--success);
+        }
+
+        .step i {
+            display: block;
+            font-size: 1rem;
+            margin-bottom: 4px;
+        }
+
+        .card {
+            background: var(--surface-light);
+            border-radius: 24px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .card-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--primary);
+        }
+
+        .device-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        /* تصميم جديد للـ preset مع زر دائري */
+        .device-preset {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 16px 12px;
+            text-align: center;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+
+        .device-preset:hover {
+            border-color: var(--primary-light);
+            background: var(--surface-lighter);
+        }
+
+        .device-icon {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+
+        .device-name {
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .device-power {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+        }
+
+        /* زر الإضافة الدائري */
+        .add-button {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            width: 32px;
+            height: 32px;
+            background: var(--primary);
+            border: 2px solid var(--surface);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.15s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            z-index: 2;
+        }
+
+        .add-button i {
+            font-size: 0.9rem;
+            color: white;
+            transition: all 0.1s ease;
+        }
+
+        /* تأثير الضغط على الزر الدائري */
+        .add-button:active {
+            transform: scale(0.85);
+            background: var(--primary-dark);
+        }
+
+        /* تأثير موجة (ripple) عند الضغط */
+        .add-button::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.6);
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s;
+            pointer-events: none;
+        }
+
+        .add-button:active::after {
+            width: 200%;
+            height: 200%;
+        }
+
+        /* للغة RTL */
+        body.rtl .add-button {
+            right: auto;
+            left: -10px;
+        }
+
+        .devices-list {
+            max-height: 450px;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+        }
+
+        .devices-list::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .devices-list::-webkit-scrollbar-track {
+            background: var(--surface);
+            border-radius: 4px;
+        }
+
+        .devices-list::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 4px;
+        }
+
+        .device-item {
+            background: var(--surface);
+            border-radius: 16px;
+            margin-bottom: 12px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            animation: slideInUp 0.3s ease-out;
+        }
+
+        /* @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        } */
+
+        .device-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 16px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .device-header:active {
+            background: var(--surface-lighter);
+        }
+
+        .device-name-display {
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .device-name-display i {
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+
+        .expand-icon {
+            color: var(--text-secondary);
+            transition: transform 0.3s ease;
+        }
+
+        .device-item.expanded .expand-icon {
+            transform: rotate(180deg);
+        }
+
+        .device-details {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            padding: 0 16px;
+        }
+
+        .device-item.expanded .device-details {
+            max-height: 300px;
+            padding: 0 16px 16px 16px;
+        }
+
+        .delete-device {
+            background: transparent;
+            border: none;
+            color: var(--danger);
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 8px;
+            border-radius: 20px;
+            transition: var(--transition);
+        }
+
+        .delete-device:active {
+            transform: scale(0.9);
+        }
+
+        .device-fields {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .field label {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+        }
+
+        .field input, .field select {
+            background: var(--surface-light);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 8px 10px;
+            color: var(--text-primary);
+            font-size: 0.85rem;
+            outline: none;
+        }
+
+        .mixed-slider {
+            margin-top: 8px;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            background: var(--surface-lighter);
+            border-radius: 5px;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--primary);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.1s ease;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:active {
+            transform: scale(1.2);
+        }
+
+        .mixed-slider label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .summary-card {
+            background: linear-gradient(135deg, var(--secondary), var(--secondary-dark));
+            border-radius: 24px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .result-card {
+            background: linear-gradient(135deg, var(--surface-light), var(--surface));
+            border-radius: 24px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid var(--primary);
+        }
+
+        .result-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            border: none;
+            width: 100%;
+            padding: 14px;
+            border-radius: 48px;
+            font-weight: bold;
+            font-size: 1rem;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 16px;
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        .btn-secondary {
+            background: var(--surface-lighter);
+            border: 1px solid var(--border);
+            width: 100%;
+            padding: 12px;
+            border-radius: 48px;
+            font-weight: 500;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-secondary:active {
+            transform: scale(0.98);
+        }
+
+        .calculation-details {
+            background: var(--surface);
+            border-radius: 16px;
+            padding: 16px;
+            margin-top: 16px;
+        }
+
+        .calculation-details h4 {
+            color: var(--primary);
+            margin-bottom: 12px;
+            font-size: 0.9rem;
+        }
+
+        .formula-item {
+            font-size: 0.75rem;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border);
+            font-family: monospace;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 90px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--surface-light);
+            backdrop-filter: blur(12px);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 60px;
+            font-size: 0.85rem;
+            z-index: 200;
+            max-width: 85%;
+            text-align: center;
+            pointer-events: none;
+            animation: toastSlide 0.3s ease-out;
+        }
+
+        @keyframes toastSlide {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+
+        body.rtl .device-item {
+            border-right: none;
+        }
+
+        .value-update {
+            display: inline-block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+    </style>
+</head>
+<body>
+<div class="app-container" id="appContainer">
+    <div class="header">
+        <div class="logo-area">
+            <button class="back-button" id="backToMainBtn"><i class="fas fa-arrow-left"></i></button>
+            <div class="logo-icon"></div>
+            <h1 id="appTitle"> المصمم الشمسي  </h1>
+        </div>
+        <button class="lang-toggle" id="langToggleBtn"><i class="fas fa-globe"></i></button>
+    </div>
+    <div class="main-content" id="mainContent">
+        <div id="dynamicView"></div>
+    </div>
+    <!-- <div class="bottom-nav" id="bottomNav"></div> -->
+</div>
+
+<script>
+    // Translations
+    const translations = {
+        ar: {
+            appName: "المصمم الشمسي",
+            step1: "الأجهزة",
+            step2: "الإعدادات",
+            step3: "المكونات",
+            step4: "النتائج",
+            step5: "التفاصيل",
+            devicePresetsTitle: "أضف جهازاً",
+            customDeviceBtn: "+ جهاز مخصص",
+            power: "الاستطاعة (W)",
+            hours: "ساعات/اليوم",
+            usageType: "نوع الاستخدام",
+            dayType: "نهاري",
+            nightType: "ليلي",
+            mixedType: "مختلط",
+            mixedRatio: "النسبة النهارية",
+            totalEnergy: "إجمالي الطاقة اليومية",
+            dayEnergy: "الطاقة النهارية",
+            nightEnergy: "الطاقة الليلية",
+            peakSunHours: "ساعات الذروة الشمسية",
+            autonomyDays: "أيام الاستقلالية",
+            batteryType: "نوع البطارية",
+            lithium: "ليثيوم أيون (LiFePO4) - خلايا EVE",
+            leadAcid: "جل/AGM (رصاصي)",
+            simultaneityFactor: "عامل التزامن",
+            inverterMargin: "هامش أمان الانفرتر",
+            panelPower: "استطاعة اللوح المفرد (Wp)",
+            batteryCapacity: "سعة البطارية الواحدة (Ah)",
+            batteryVoltage: "جهد البطارية (V)",
+            systemVoltage: "نظام الجهد",
+            calculate: "احسب التجميعة",
+            saveSystem: "حفظ التجميعة",
+            pvRequired: "استطاعة الألواح المطلوبة",
+            panelsCount: "عدد الألواح",
+            batteryRequired: "سعة البطارية المطلوبة",
+            batteriesCount: "عدد البطاريات",
+            inverterPower: "استطاعة الانفرتر",
+            recommended: "الموصى به",
+            emptyDevices: "أضف جهازاً واحداً على الأقل",
+            saved: "تم حفظ التجميعة",
+            calculationDetails: "تفاصيل العمليات الحسابية",
+            formulaTotalEnergy: "إجمالي الطاقة = Σ (الاستطاعة × ساعات الاستخدام)",
+            formulaPvPower: "استطاعة الألواح = (الطاقة الإجمالية × 1.3) ÷ ساعات الذروة",
+            formulaBattery: "سعة البطارية = (الطاقة الليلية × أيام الاستقلالية) ÷ (عمق التفريغ × جهد النظام)",
+            formulaInverter: "استطاعة الانفرتر = (مجموع الاستطاعات × عامل التزامن) × (1 + هامش الأمان)"
+        },
+        en: {
+            appName: "SolarFit ",
+            step1: "Devices",
+            step2: "Settings",
+            step3: "Components",
+            step4: "Results",
+            step5: "Details",
+            devicePresetsTitle: "Add Device",
+            customDeviceBtn: "+ Custom Device",
+            power: "Power (W)",
+            hours: "Hours/Day",
+            usageType: "Usage Type",
+            dayType: "Daytime",
+            nightType: "Nighttime",
+            mixedType: "Mixed",
+            mixedRatio: "Daytime Ratio",
+            totalEnergy: "Total Daily Energy",
+            dayEnergy: "Daytime Energy",
+            nightEnergy: "Nighttime Energy",
+            peakSunHours: "Peak Sun Hours",
+            autonomyDays: "Autonomy Days",
+            batteryType: "Battery Type",
+            lithium: "Lithium Ion (LiFePO4) - EVE Cells",
+            leadAcid: "Gel/AGM (Lead Acid)",
+            simultaneityFactor: "Simultaneity Factor",
+            inverterMargin: "Inverter Safety Margin",
+            panelPower: "Single Panel Power (Wp)",
+            batteryCapacity: "Single Battery Capacity (Ah)",
+            batteryVoltage: "Battery Voltage (V)",
+            systemVoltage: "System Voltage",
+            calculate: "Calculate System",
+            saveSystem: "Save System",
+            pvRequired: "Required PV Power",
+            panelsCount: "Number of Panels",
+            batteryRequired: "Required Battery Capacity",
+            batteriesCount: "Number of Batteries",
+            inverterPower: "Inverter Power",
+            recommended: "Recommended",
+            emptyDevices: "Add at least one device",
+            saved: "System saved",
+            calculationDetails: "Calculation Details",
+            formulaTotalEnergy: "Total Energy = Σ (Power × Hours)",
+            formulaPvPower: "PV Power = (Total Energy × 1.3) ÷ Peak Sun Hours",
+            formulaBattery: "Battery Capacity = (Night Energy × Autonomy Days) ÷ (DoD × System Voltage)",
+            formulaInverter: "Inverter Power = (Total Power × Simultaneity) × (1 + Margin)"
+        }
+    };
+
+    const deviceDatabase = [
+        { name: "ثلاجة", nameEn: "Refrigerator", power: 150, icon: "fas fa-thermometer-half" },
+        { name: "مكيف 1 طن", nameEn: "AC 1 Ton", power: 1200, icon: "fas fa-wind" },
+        { name: "مكيف 1.5 طن", nameEn: "AC 1.5 Ton", power: 1800, icon: "fas fa-wind" },
+        { name: "مكيف 2 طن", nameEn: "AC 2 Ton", power: 2400, icon: "fas fa-wind" },
+        { name: "غسالة", nameEn: "Washing Machine", power: 500, icon: "fas fa-tshirt" },
+        { name: "مجفف ملابس", nameEn: "Dryer", power: 2000, icon: "fas fa-tshirt" },
+        { name: "ميكروويف", nameEn: "Microwave", power: 1000, icon: "fas fa-utensils" },
+        { name: "غلاية", nameEn: "Kettle", power: 1500, icon: "fas fa-mug-hot" },
+        { name: "تلفزيون", nameEn: "TV", power: 100, icon: "fas fa-tv" },
+        { name: "حاسوب محمول", nameEn: "Laptop", power: 65, icon: "fas fa-laptop" },
+        { name: "لمبة LED", nameEn: "LED Light", power: 10, icon: "fas fa-lightbulb" },
+        { name: "مضخة ماء", nameEn: "Water Pump", power: 750, icon: "fas fa-water" },
+        { name: "مروحة سقف", nameEn: "Ceiling Fan", power: 75, icon: "fas fa-fan" }
+    ];
+
+    let currentLang = "ar";
+    let currentStep = 1;
+    let devices = [];
+    let expandedDevices = new Set();
+    let systemSettings = {
+        peakSunHours: 5,
+        autonomyDays: 2,
+        batteryType: "lithium",
+        simultaneityFactor: 0.7,
+        inverterMargin: 0.2
+    };
+    let componentSettings = {
+        panelPower: 550,
+        batteryCapacity: 200,
+        batteryVoltage: 12,
+        systemVoltage: null
+    };
+    let calculationResults = null;
+
+    function t(key) { return translations[currentLang][key] || key; }
+
+    function showToast(message) {
+        let toast = document.querySelector(".toast");
+        if(toast) toast.remove();
+        const div = document.createElement("div");
+        div.className = "toast";
+        div.innerText = message;
+        document.body.appendChild(div);
+        setTimeout(() => div.remove(), 3000);
+    }
+
+    function addDevice(deviceTemplate) {
+        const newDevice = {
+            id: Date.now(),
+            name: currentLang === "ar" ? deviceTemplate.name : deviceTemplate.nameEn,
+            power: deviceTemplate.power,
+            hours: deviceTemplate.name === "ثلاجة" || deviceTemplate.name === "Refrigerator" ? 24 : 4,
+            usageType: "mixed",
+            mixedRatio: 50,
+            icon: deviceTemplate.icon
+        };
+        devices.unshift(newDevice);
+        renderCurrentStep();
+        setTimeout(() => {
+            const devicesContainer = document.querySelector('.devices-list');
+            if(devicesContainer) devicesContainer.scrollTop = 0;
+        }, 50);
+        showToast(`${currentLang === "ar" ? "تم إضافة" : "Added"} ${newDevice.name}`);
+    }
+
+    function addCustomDevice() {
+        const name = prompt(t("deviceName"));
+        if(!name) return;
+        const power = parseFloat(prompt(t("power"), "100"));
+        if(isNaN(power)) return;
+        devices.unshift({
+            id: Date.now(),
+            name: name,
+            power: power,
+            hours: 4,
+            usageType: "mixed",
+            mixedRatio: 50,
+            icon: "fas fa-plug"
+        });
+        renderCurrentStep();
+        showToast(`${currentLang === "ar" ? "تم إضافة" : "Added"} ${name}`);
+    }
+
+    function toggleDeviceExpand(deviceId) {
+        if(expandedDevices.has(deviceId)) {
+            expandedDevices.delete(deviceId);
+        } else {
+            expandedDevices.add(deviceId);
+        }
+        renderCurrentStep();
+    }
+
+    function updateDevice(deviceId, field, value) {
+        const device = devices.find(d => d.id === deviceId);
+        if(device) {
+            device[field] = field === "power" || field === "hours" ? parseFloat(value) || 0 : value;
+            renderCurrentStep();
+        }
+    }
+
+    function deleteDevice(deviceId) {
+        devices = devices.filter(d => d.id !== deviceId);
+        expandedDevices.delete(deviceId);
+        renderCurrentStep();
+    }
+
+    function calculateEnergy() {
+        let totalEnergy = 0, dayEnergy = 0, nightEnergy = 0;
+        devices.forEach(device => {
+            const dailyEnergy = device.power * device.hours;
+            totalEnergy += dailyEnergy;
+            if(device.usageType === "day") dayEnergy += dailyEnergy;
+            else if(device.usageType === "night") nightEnergy += dailyEnergy;
+            else if(device.usageType === "mixed") {
+                const dayRatio = (device.mixedRatio || 50) / 100;
+                dayEnergy += dailyEnergy * dayRatio;
+                nightEnergy += dailyEnergy * (1 - dayRatio);
+            }
+        });
+        return { totalEnergy, dayEnergy, nightEnergy };
+    }
+
+    function calculateSystem() {
+        const { totalEnergy, nightEnergy } = calculateEnergy();
+        if(devices.length === 0) return null;
+        const dod = systemSettings.batteryType === "lithium" ? 0.8 : 0.5;
+        const pvRequired = (totalEnergy * 1.3) / systemSettings.peakSunHours;
+        let recommendedVoltage = 12;
+        if(pvRequired > 3000) recommendedVoltage = 48;
+        else if(pvRequired > 1000) recommendedVoltage = 24;
+        const systemVoltage = componentSettings.systemVoltage || recommendedVoltage;
+        const batteryWh = nightEnergy * systemSettings.autonomyDays * (1 / dod);
+        const batteryAh = batteryWh / systemVoltage;
+        let totalPower = 0;
+        devices.forEach(d => { totalPower += d.power; });
+        const inverterPower = totalPower * systemSettings.simultaneityFactor * (1 + systemSettings.inverterMargin);
+        calculationResults = {
+            totalEnergy: Math.round(totalEnergy),
+            nightEnergy: Math.round(nightEnergy),
+            pvRequired: Math.round(pvRequired),
+            panelsCount: Math.ceil(pvRequired / componentSettings.panelPower),
+            batteryAh: Math.round(batteryAh),
+            batteriesCount: Math.ceil(batteryAh / componentSettings.batteryCapacity),
+            systemVoltage: systemVoltage,
+            inverterPower: Math.round(inverterPower),
+            dod: dod,
+            peakSunHours: systemSettings.peakSunHours,
+            autonomyDays: systemSettings.autonomyDays
+        };
+        renderCurrentStep();
+    }
+
+    function renderCurrentStep() {
+        const container = document.getElementById("dynamicView");
+        if(!container) return;
+        const { totalEnergy, dayEnergy, nightEnergy } = calculateEnergy();
+        const stepsCount = calculationResults ? 5 : 4;
+        
+        let stepsHtml = `<div class="steps-container">`;
+        for(let i = 1; i <= stepsCount; i++) {
+            stepsHtml += `
+                <div class="step ${currentStep === i ? 'active' : ''} ${currentStep > i ? 'completed' : ''}" onclick="goToStep(${i})">
+                    <i class="fas ${i === 1 ? 'fa-plug' : i === 2 ? 'fa-sliders-h' : i === 3 ? 'fa-solar-panel' : i === 4 ? 'fa-chart-line' : 'fa-calculator'}"></i>
+                    <span>${t(`step${i}`)}</span>
+                </div>
+            `;
+        }
+        stepsHtml += `</div>`;
+
+        if(currentStep === 1) {
+            const deviceGrid = deviceDatabase.map(d => `
+                <div class="device-preset">
+                    <div class="add-button" onclick="addDevice(${JSON.stringify(d).replace(/"/g, '&quot;')})">
+                        <i class="fas fa-plus"></i>
+                    </div>
+                    <div class="device-icon">
+                        <i class="${d.icon}"></i>
+                    </div>
+                    <div class="device-name">${currentLang === "ar" ? d.name : d.nameEn}</div>
+                    <div class="device-power">${d.power}W</div>
+                </div>
+            `).join('');
+            
+            const devicesListHtml = devices.map(device => `
+                <div class="device-item ${expandedDevices.has(device.id) ? 'expanded' : ''}">
+                    <div class="device-header" onclick="toggleDeviceExpand(${device.id})">
+                        <div class="device-name-display">
+                            <i class="${device.icon}"></i>
+                            <span>${device.name}</span>
+                            <span style="font-size:0.7rem;color:var(--text-secondary)">${device.power}W</span>
+                        </div>
+                        <div style="display:flex;gap:8px;align-items:center">
+                            <i class="fas fa-chevron-down expand-icon"></i>
+                            <button class="delete-device" onclick="event.stopPropagation(); deleteDevice(${device.id})"><i class="fas fa-trash-alt"></i></button>
+                        </div>
+                    </div>
+                    <div class="device-details">
+                        <div class="device-fields">
+                            <div class="field"><label>${t("power")}</label><input type="number" value="${device.power}" onchange="updateDevice(${device.id}, 'power', this.value)"></div>
+                            <div class="field"><label>${t("hours")}</label><input type="number" step="0.5" value="${device.hours}" onchange="updateDevice(${device.id}, 'hours', this.value)"></div>
+                            <div class="field"><label>${t("usageType")}</label>
+                                <select onchange="updateDevice(${device.id}, 'usageType', this.value)">
+                                    <option value="day" ${device.usageType === 'day' ? 'selected' : ''}>${t("dayType")}</option>
+                                    <option value="night" ${device.usageType === 'night' ? 'selected' : ''}>${t("nightType")}</option>
+                                    <option value="mixed" ${device.usageType === 'mixed' ? 'selected' : ''}>${t("mixedType")}</option>
+                                </select>
+                            </div>
+                        </div>
+                        ${device.usageType === 'mixed' ? `<div class="mixed-slider"><label>${t("mixedRatio")}: ${device.mixedRatio || 50}%</label><input type="range" min="0" max="100" value="${device.mixedRatio || 50}" onchange="updateDevice(${device.id}, 'mixedRatio', this.value)"></div>` : ''}
+                    </div>
+                </div>
+            `).join('');
+            
+            container.innerHTML = `${stepsHtml}
+                <div class="card"><div class="card-title"><i class="fas fa-list"></i> ${t("devicePresetsTitle")}</div><div class="device-grid">${deviceGrid}</div><button class="btn-secondary" onclick="addCustomDevice()"><i class="fas fa-plus"></i> ${t("customDeviceBtn")}</button></div>
+                <div class="card"><div class="card-title"><i class="fas fa-microchip"></i> الأجهزة المضافة (${devices.length})</div><div class="devices-list">${devicesListHtml || '<div style="text-align:center;padding:20px;"><i class="fas fa-plus-circle"></i> أضف أجهزة من الأعلى</div>'}</div></div>
+                <div class="summary-card"><div class="summary-row"><span>${t("totalEnergy")}</span><span><strong>${Math.round(totalEnergy)}</strong> Wh</span></div><div class="summary-row"><span>${t("dayEnergy")}</span><span><strong>${Math.round(dayEnergy)}</strong> Wh</span></div><div class="summary-row"><span>${t("nightEnergy")}</span><span><strong>${Math.round(nightEnergy)}</strong> Wh</span></div></div>
+                <button class="btn-primary" class="nav-item" onclick="goToStep(2)" ${devices.length === 0 ? 'disabled style="opacity:0.5"' : ''}><i class="fas fa-arrow-left"></i> ${currentLang === "ar" ? "التالي" : "Next"}</button>`;
+        }
+        else if(currentStep === 2) {
+            container.innerHTML = `${stepsHtml}
+                <div class="card"><div class="card-title"><i class="fas fa-map-marker-alt"></i> الموقع والطقس</div>
+                    <div class="field" style="margin-bottom:16px"><label>${t("peakSunHours")}</label><input type="number" step="0.5" id="peakSunHours" value="${systemSettings.peakSunHours}"></div>
+                    <div class="field"><label>${t("autonomyDays")}</label><select id="autonomyDays"><option value="1">1 ${currentLang === "ar" ? "يوم" : "day"}</option><option value="2" selected>2 ${currentLang === "ar" ? "يوم" : "days"}</option><option value="3">3 ${currentLang === "ar" ? "أيام" : "days"}</option></select></div></div>
+                <div class="card"><div class="card-title"><i class="fas fa-battery-full"></i> ${t("batteryType")}</div><select id="batteryType" style="width:100%;padding:12px;border-radius:16px;background:var(--surface);border:1px solid var(--border);color:white"><option value="lithium" selected>${t("lithium")}</option><option value="lead">${t("leadAcid")}</option></select></div>
+                <div class="card"><div class="card-title"><i class="fas fa-chart-line"></i> خيارات متقدمة</div>
+                    <div class="field" style="margin-bottom:16px"><label>${t("simultaneityFactor")}: <span id="simFactorVal">${Math.round(systemSettings.simultaneityFactor * 100)}</span>%</label><input type="range" min="0.3" max="1" step="0.05" id="simultaneityFactor" value="${systemSettings.simultaneityFactor}" oninput="document.getElementById('simFactorVal').innerText = Math.round(this.value*100)"></div>
+                    <div class="field"><label>${t("inverterMargin")}: <span id="invMarginVal">${Math.round(systemSettings.inverterMargin * 100)}</span>%</label><input type="range" min="0.1" max="0.5" step="0.05" id="inverterMargin" value="${systemSettings.inverterMargin}" oninput="document.getElementById('invMarginVal').innerText = Math.round(this.value*100)"></div></div>
+                <button class="btn-primary" onclick="saveSettingsAndNext()"><i class="fas fa-save"></i> ${currentLang === "ar" ? "حفظ ومتابعة" : "Save & Continue"}</button>`;
+        }
+        else if(currentStep === 3) {
+            container.innerHTML = `${stepsHtml}
+                <div class="card"><div class="card-title"><i class="fas fa-solar-panel"></i> الألواح الشمسية</div><div class="field"><label>${t("panelPower")}</label><input type="number" id="panelPower" value="${componentSettings.panelPower}"></div></div>
+                <div class="card"><div class="card-title"><i class="fas fa-battery-full"></i> البطاريات</div><div class="field" style="margin-bottom:16px"><label>${t("batteryCapacity")} (Ah)</label><input type="number" id="batteryCapacity" value="${componentSettings.batteryCapacity}"></div><div class="field"><label>${t("batteryVoltage")} (V)</label><input type="number" id="batteryVoltage" value="${componentSettings.batteryVoltage}"></div></div>
+                <div class="card"><div class="card-title"><i class="fas fa-bolt"></i> ${t("systemVoltage")}</div><select id="systemVoltage" style="width:100%;padding:12px;border-radius:16px;background:var(--surface);border:1px solid var(--border);color:white"><option value="12">12V</option><option value="24">24V</option><option value="48">48V</option><option value="auto" selected>${currentLang === "ar" ? "تلقائي" : "Auto"}</option></select></div>
+                <button class="btn-primary" onclick="saveComponentsAndCalculate()"><i class="fas fa-calculator"></i> ${t("calculate")}</button>`;
+        }
+        else if(currentStep === 4 && calculationResults) {
+            const r = calculationResults;
+            container.innerHTML = `${stepsHtml}
+                <div class="result-card"><div class="card-title"><i class="fas fa-chart-line"></i> ${t("recommended")}</div>
+                    <div class="summary-row"><span>${t("totalEnergy")}</span><span>${r.totalEnergy} Wh</span></div>
+                    <div class="summary-row"><span>${t("pvRequired")}</span><span class="result-value">${r.pvRequired} Wp</span></div>
+                    <div class="summary-row"><span>${t("panelsCount")} (${componentSettings.panelPower}W)</span><span><strong>${r.panelsCount}</strong> ${currentLang === "ar" ? "لوح" : "panels"}</span></div>
+                    <div class="summary-row"><span>${t("batteryRequired")}</span><span>${r.batteryAh} Ah @ ${r.systemVoltage}V</span></div>
+                    <div class="summary-row"><span>${t("batteriesCount")} (${componentSettings.batteryCapacity}Ah)</span><span><strong>${r.batteriesCount}</strong> ${currentLang === "ar" ? "بطارية" : "batteries"}</span></div>
+                    <div class="summary-row"><span>${t("systemVoltage")}</span><span>${r.systemVoltage}V</span></div>
+                    <div class="summary-row"><span>${t("inverterPower")}</span><span>${r.inverterPower} W</span></div></div>
+                <button class="btn-primary" onclick="goToStep(5)"><i class="fas fa-chart-simple"></i> ${currentLang === "ar" ? "عرض التفاصيل الحسابية" : "Show Calculation Details"}</button>
+                <button class="btn-primary" onclick="saveSystemToHistory()"><i class="fas fa-save"></i> ${t("saveSystem")}</button>
+                <button class="btn-secondary" onclick="goToStep(1)"><i class="fas fa-edit"></i> ${currentLang === "ar" ? "تعديل التصميم" : "Edit Design"}</button>`;
+        }
+        else if(currentStep === 5 && calculationResults) {
+            const r = calculationResults;
+            const dod = systemSettings.batteryType === "lithium" ? "80%" : "50%";
+            container.innerHTML = `${stepsHtml}
+                <div class="card"><div class="card-title"><i class="fas fa-calculator"></i> ${t("calculationDetails")}</div>
+                    <div class="calculation-details"><h4><i class="fas fa-chart-line"></i> 1. ${t("formulaTotalEnergy")}</h4><div class="formula-item">${r.totalEnergy} Wh = Σ (الاستطاعة × ساعات الاستخدام)</div>
+                    <h4 style="margin-top:12px"><i class="fas fa-sun"></i> 2. ${t("formulaPvPower")}</h4><div class="formula-item">${r.pvRequired} Wp = (${r.totalEnergy} × 1.3) ÷ ${r.peakSunHours}</div>
+                    <div class="formula-item" style="font-size:0.7rem;color:var(--text-secondary)"><i class="fas fa-info-circle"></i> * خصم 30% من استطاعة الألواح لتعويض الفقد</div>
+                    <h4 style="margin-top:12px"><i class="fas fa-battery-full"></i> 3. ${t("formulaBattery")}</h4><div class="formula-item">${r.batteryAh} Ah = (${r.nightEnergy} × ${r.autonomyDays}) ÷ (${dod} × ${r.systemVoltage}V)</div>
+                    <h4 style="margin-top:12px"><i class="fas fa-bolt"></i> 4. ${t("formulaInverter")}</h4><div class="formula-item">${r.inverterPower} W = (${Math.round(r.inverterPower / ((systemSettings.simultaneityFactor) * (1 + systemSettings.inverterMargin)))} × ${systemSettings.simultaneityFactor * 100}%) × ${1 + systemSettings.inverterMargin}</div></div></div>
+                <button class="btn-primary" onclick="goToStep(4)"><i class="fas fa-arrow-left"></i> ${currentLang === "ar" ? "العودة للنتائج" : "Back to Results"}</button>`;
+        }
+        else if(currentStep === 4 && !calculationResults) {
+            container.innerHTML = `${stepsHtml}<div class="card" style="text-align:center;padding:40px"><i class="fas fa-calculator" style="font-size:48px;color:var(--primary);margin-bottom:16px"></i><p>${currentLang === "ar" ? "الرجاء العودة إلى الخطوة 3 وحساب التجميعة" : "Please go back to step 3 and calculate"}</p><button class="btn-primary" onclick="goToStep(3)"><i class="fas fa-arrow-left"></i> ${currentLang === "ar" ? "العودة للخطوة 3" : "Back to Step 3"}</button></div>`;
+        }
+    }
+
+    function goToStep(step) { currentStep = step; renderCurrentStep(); }
+    function saveSettingsAndNext() {
+        systemSettings.peakSunHours = parseFloat(document.getElementById("peakSunHours")?.value) || 5;
+        systemSettings.autonomyDays = parseInt(document.getElementById("autonomyDays")?.value) || 2;
+        systemSettings.batteryType = document.getElementById("batteryType")?.value || "lithium";
+        systemSettings.simultaneityFactor = parseFloat(document.getElementById("simultaneityFactor")?.value) || 0.7;
+        systemSettings.inverterMargin = parseFloat(document.getElementById("inverterMargin")?.value) || 0.2;
+        goToStep(3);
+    }
+    function saveComponentsAndCalculate() {
+        componentSettings.panelPower = parseFloat(document.getElementById("panelPower")?.value) || 550;
+        componentSettings.batteryCapacity = parseFloat(document.getElementById("batteryCapacity")?.value) || 200;
+        componentSettings.batteryVoltage = parseFloat(document.getElementById("batteryVoltage")?.value) || 12;
+        const sysVoltageSelect = document.getElementById("systemVoltage")?.value;
+        componentSettings.systemVoltage = sysVoltageSelect === "auto" ? null : parseInt(sysVoltageSelect);
+        calculateSystem();
+        goToStep(4);
+    }
+    function saveSystemToHistory() {
+        if(devices.length === 0) { showToast(t("emptyDevices")); return; }
+        showToast(t("saved"));
+    }
+    function setLanguage(lang) {
+        currentLang = lang;
+        localStorage.setItem("designer_lang", lang);
+        document.body.classList.toggle("rtl", lang === "ar");
+        document.getElementById("appTitle").innerText = t("appName");
+        renderCurrentStep();
+    }
+
+    window.addDevice = addDevice;
+    window.addCustomDevice = addCustomDevice;
+    window.updateDevice = updateDevice;
+    window.deleteDevice = deleteDevice;
+    window.toggleDeviceExpand = toggleDeviceExpand;
+    window.goToStep = goToStep;
+    window.saveSettingsAndNext = saveSettingsAndNext;
+    window.saveComponentsAndCalculate = saveComponentsAndCalculate;
+    window.saveSystemToHistory = saveSystemToHistory;
+
+    document.getElementById("backToMainBtn")?.addEventListener("click", () => { window.location.href = "index.html" });
+    document.getElementById("langToggleBtn")?.addEventListener("click", () => { setLanguage(currentLang === "ar" ? "en" : "ar"); });
+    
+    // const bottomNav = document.getElementById("bottomNav");
+    // bottomNav.innerHTML = `<button class="nav-item active"><i class="fas fa-calculator"></i><span>${currentLang === "ar" ? "الحاسبة" : "Calculator"}</span></button>`;
+    const savedLang = localStorage.getItem("designer_lang");
+    if(savedLang === "ar" || savedLang === "en") currentLang = savedLang;
+    setLanguage(currentLang);
+</script>
+</body>
+</html>

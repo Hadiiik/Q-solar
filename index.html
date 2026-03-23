@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
-    <title>SolarEco | Solar Tools</title>
+    <title>QSolar | Solar Tools</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <script src="https://unpkg.com/@ericblade/quagga2@1.8.2/dist/quagga.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -268,7 +267,7 @@
             outline: none;
         }
 
-        .scan-btn, .verify-btn {
+        .verify-btn {
             border: none;
             width: 100%;
             padding: 14px;
@@ -283,17 +282,10 @@
             margin-bottom: 20px;
             cursor: pointer;
             transition: 0.2s;
-        }
-
-        .scan-btn {
-            background: var(--secondary);
-        }
-
-        .verify-btn {
             background: var(--primary);
         }
 
-        .scan-btn:active, .verify-btn:active {
+        .verify-btn:active {
             opacity: 0.8;
             transform: scale(0.98);
         }
@@ -463,111 +455,6 @@
             border-radius: 32px;
         }
 
-        .scanner-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #000;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .scanner-header {
-            padding: 20px;
-            background: rgba(0,0,0,0.85);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 10;
-        }
-
-        .close-scanner {
-            background: var(--danger);
-            border: none;
-            color: white;
-            padding: 8px 20px;
-            border-radius: 40px;
-            font-size: 1rem;
-            cursor: pointer;
-        }
-
-        .scanner-view {
-            flex: 1;
-            position: relative;
-            background: #000;
-            overflow: hidden;
-        }
-
-        #interactive {
-            width: 100%;
-            height: 100%;
-            position: relative;
-        }
-
-        .capture-overlay {
-            position: absolute;
-            bottom: 40px;
-            left: 0;
-            right: 0;
-            display: flex;
-            justify-content: center;
-            z-index: 1001;
-        }
-
-        .capture-btn {
-            background: var(--primary);
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            border: 4px solid white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-            transition: transform 0.2s;
-        }
-
-        .capture-btn:active {
-            transform: scale(0.92);
-        }
-
-        .capture-btn i {
-            font-size: 2.5rem;
-            color: white;
-        }
-
-        .scan-guide-rect {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 75%;
-            max-width: 280px;
-            height: 180px;
-            border: 3px solid rgba(220,134,35,0.9);
-            border-radius: 20px;
-            box-shadow: 0 0 0 2000px rgba(0,0,0,0.5);
-            pointer-events: none;
-            z-index: 1000;
-        }
-
-        .scanner-footer-text {
-            position: absolute;
-            bottom: 120px;
-            left: 0;
-            right: 0;
-            text-align: center;
-            color: white;
-            background: rgba(0,0,0,0.6);
-            padding: 6px;
-            font-size: 0.8rem;
-            z-index: 1001;
-        }
-
         @keyframes spin { to { transform: rotate(360deg); } }
         @keyframes fadeSlide { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
@@ -599,6 +486,14 @@
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
         }
+        
+        .paste-hint {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            text-align: center;
+            margin-top: 8px;
+            margin-bottom: 16px;
+        }
     </style>
 </head>
 <body>
@@ -617,26 +512,30 @@
 </div>
 <script>
     (function(){
+        // ==================== TRANSLATIONS (AR/EN) ====================
         const translations = {
             ar: {
-                appName: "سولار إيكو",
+                appName: "كيو سولار",
                 tabs: [
                     { id: "verify", name: "التحقق", icon: "fas fa-check-circle" },
                     { id: "calculator", name: "الحاسبة", icon: "fas fa-calculator" },
                     { id: "guide", name: "الدليل", icon: "fas fa-book-open" },
                     { id: "history", name: "السجل", icon: "fas fa-history" }
                 ],
-                devices: [{ id: "trina", name: "ألواح ترينا", icon: "fas fa-solar-panel" }],
+                devices: [
+                    { id: "trina", name: "ألواح ترينا", icon: "fas fa-solar-panel" },
+                    { id: "aiko", name: "ألواح AIKO", icon: "fas fa-sun" }
+                ],
                 backBtn: "رجوع",
-                snPlaceholder: "أدخل الرقم التسلسلي SN",
-                scanButton: "تصوير الباركود",
+                snPlaceholder: "أدخل الرقم التسلسلي / Lot ID",
                 verifyButton: "تحقق",
-                successMessage: "✓ اللوح أصلي ومعتمد من ترينا",
-                fakeWarning: "⚠ تحذير: هذا اللوح غير أصلي أو غير تابع لشركة ترينا",
+                successMessageTrina: "✓ اللوح أصلي ومعتمد من ترينا",
+                successMessageAiko: "✓ اللوح أصلي ومعتمد من AIKO",
+                fakeWarningTrina: "⚠ تحذير: هذا اللوح غير أصلي أو غير تابع لشركة ترينا",
+                fakeWarningAiko: "⚠ تحذير: هذا اللوح غير أصلي أو غير تابع لشركة AIKO",
                 error500: "تم إرسال طلبات كثيرة متتابعة، يرجى المحاولة بعد دقيقة",
                 networkError: "حدث خطأ في الاتصال، يرجى المحاولة مرة أخرى",
                 loading: "جار التحقق...",
-                cameraInitError: "تعذر تشغيل الكاميرا",
                 serialRequired: "الرجاء إدخال الرقم التسلسلي",
                 historyEmpty: "لا توجد عمليات تحقق بعد",
                 clearHistory: "مسح السجل",
@@ -644,47 +543,58 @@
                 grade: "الدرجة",
                 queryTime: "وقت الاستعلام",
                 serialNo: "الرقم التسلسلي",
-                calculatorMsg: "🧮 أداة الحاسبة قريباً: تقدير إنتاج الطاقة وتوفير التكاليف",
+                calculatorMsg: "أداة ذكية لتصميم نظامك الشمسي. اختر أجهزتك، حدد أوقات التشغيل، واحصل على الخيار الصحيح.",
                 guideMsg: "📘 دليل الطاقة الشمسية: نصائح حول تركيب الألواح وصيانتها ومطابقة المحولات",
                 deviceSelectTitle: "اختر جهازاً للتحقق",
                 statusFailed: "❌ غير معتمد",
                 statusSuccess: "✓ معتمد",
-                scanHint: "ضع الباركود داخل المستطيل ثم اضغط زر التصوير",
-                processing: "جاري معالجة الباركود..."
+                pasteHint: "يمكنك لصق الرقم التسلسلي (SN / Lot ID) من الحافظة",
+                pmax: "الاستطاعة القصوى (W)",
+                voc: "جهد الدائرة المفتوحة (V)",
+                isc: "تيار القصر (A)",
+                vmp: "جهد القدرة القصوى (V)",
+                imp: "تيار القدرة القصوى (A)"
             },
             en: {
-                appName: "SolarEco",
+                appName: "QSolar",
                 tabs: [
                     { id: "verify", name: "Verify", icon: "fas fa-check-circle" },
                     { id: "calculator", name: "Calculator", icon: "fas fa-calculator" },
                     { id: "guide", name: "Guide", icon: "fas fa-book-open" },
                     { id: "history", name: "History", icon: "fas fa-history" }
                 ],
-                devices: [{ id: "trina", name: "Trina Solar Panels", icon: "fas fa-solar-panel" }],
+                devices: [
+                    { id: "trina", name: "Trina Solar Panels", icon: "fas fa-solar-panel" },
+                    { id: "aiko", name: "AIKO Solar Panels", icon: "fas fa-sun" }
+                ],
                 backBtn: "Back",
-                snPlaceholder: "Enter Serial Number (SN)",
-                scanButton: "Capture Barcode",
+                snPlaceholder: "Enter Serial Number / Lot ID",
                 verifyButton: "Verify",
-                successMessage: "✓ Panel is genuine & certified by Trina Solar",
-                fakeWarning: "⚠ Warning: This panel is not genuine or not from Trina Solar",
+                successMessageTrina: "✓ Panel is genuine & certified by Trina Solar",
+                successMessageAiko: "✓ Panel is genuine & certified by AIKO",
+                fakeWarningTrina: "⚠ Warning: This panel is not genuine or not from Trina Solar",
+                fakeWarningAiko: "⚠ Warning: This panel is not genuine or not from AIKO",
                 error500: "Too many requests, please try again after a minute",
                 networkError: "Connection error, please try again",
                 loading: "Verifying...",
-                cameraInitError: "Camera failed to start",
-                serialRequired: "Please enter serial number",
+                serialRequired: "Please enter serial number / Lot ID",
                 historyEmpty: "No verification records yet",
                 clearHistory: "Clear History",
                 moduleType: "Module Type",
                 grade: "Grade",
                 queryTime: "Query Time",
                 serialNo: "Serial No.",
-                calculatorMsg: "🧮 Calculator Tool: Estimate energy yield & savings (coming soon)",
+                calculatorMsg: "A smart tool to design your solar system. Choose your devices, set operation times, and get the right solution.",
                 guideMsg: "📘 Solar Guide: Installation tips, inverter matching & maintenance",
                 deviceSelectTitle: "Select a device to verify",
                 statusFailed: "❌ Not Certified",
                 statusSuccess: "✓ Certified",
-                scanHint: "Place barcode inside rectangle and press capture",
-                processing: "Processing barcode..."
+                pasteHint: "You can paste the serial number (SN / Lot ID) from clipboard",
+                pmax: "Max Power (W)",
+                voc: "Open Circuit Voltage (V)",
+                isc: "Short Circuit Current (A)",
+                vmp: "Voltage at Pmax (V)",
+                imp: "Current at Pmax (A)"
             }
         };
 
@@ -696,17 +606,16 @@
         ];
 
         const devicesList = [
-            { id: "trina", icon: "fas fa-solar-panel", nameAr: "ألواح ترينا", nameEn: "Trina Solar Panels" }
+            { id: "trina", icon: "fas fa-solar-panel", nameAr: "ألواح ترينا", nameEn: "Trina Solar Panels", apiType: "trina" },
+            { id: "aiko", icon: "fas fa-sun", nameAr: "ألواح AIKO", nameEn: "AIKO Solar Panels", apiType: "aiko" }
         ];
 
         let currentLang = "ar";
         let activeTab = "verify";
-        let trinaViewState = "deviceList";
+        let currentDeviceContext = null; // 'trina' or 'aiko'
+        let trinaViewState = "deviceList"; // for trina legacy, but we use generic deviceContext now
         let touchStartX = 0;
         let touchEndX = 0;
-        let isScanning = false;
-        let currentStream = null;
-        let processingCapture = false;
 
         function isEmptyValue(value) {
             if(value === null || value === undefined) return true;
@@ -757,7 +666,7 @@
                 }
             }
             activeTab = newTabId;
-            if(activeTab === "verify") trinaViewState = "deviceList";
+            if(activeTab === "verify") currentDeviceContext = null;
             renderCurrentView();
             renderBottomNav();
         }
@@ -805,59 +714,96 @@
             setTimeout(() => div.remove(), duration);
         }
 
-        function renderCurrentView() {
-            const viewContainer = document.getElementById("dynamicView");
-            if(!viewContainer) return;
-            viewContainer.classList.add('view-wrapper');
-            if(activeTab === "verify") {
-                if(trinaViewState === "deviceList") {
-                    renderDeviceList(viewContainer);
-                } else {
-                    renderTrinaVerificationForm(viewContainer);
+        // ========== AIKO VERIFICATION API ==========
+        async function performAikoVerification(lotId) {
+            if(!lotId || lotId.trim() === "") {
+                showToast(t("serialRequired"));
+                return null;
+            }
+            const resultContainer = document.getElementById("aikoResultArea");
+            if(resultContainer) resultContainer.innerHTML = `<div style="text-align:center; padding:20px;"><div class="loader"></div><p>${t("loading")}</p></div>`;
+            
+            let verificationRecord = {
+                deviceType: "AIKO",
+                serialNo: lotId.trim(),
+                timestamp: Date.now(),
+                status: "failed",
+                moduleType: null,
+                grade: null,
+                queryTime: null,
+                errorMessage: null,
+                extraData: null
+            };
+            
+            try {
+                const url = 'https://verify.aikosolar.com/verify/component/getInfo';
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ lotId: lotId.trim() })
+                });
+                
+                if(!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
                 }
-            } else if(activeTab === "calculator") {
-                viewContainer.innerHTML = `<div class="calculator-placeholder"><i class="fas fa-calculator" style="font-size: 48px; color: var(--primary); margin-bottom: 16px; display: block;"></i><p>${t("calculatorMsg")}</p></div>`;
-            } else if(activeTab === "guide") {
-                viewContainer.innerHTML = `<div class="guide-placeholder"><i class="fas fa-leaf" style="font-size: 48px; color: var(--primary); margin-bottom: 16px;"></i><p>${t("guideMsg")}</p><p style="margin-top:12px; font-size:0.85rem;">🔋 Trina Solar | Jinko | Longi references</p></div>`;
-            } else if(activeTab === "history") {
-                renderHistoryView(viewContainer);
+                
+                const result = await response.json();
+                
+                // Success case: code === '200' and data is not null (has componentModel)
+                if(result.code === '200' && result.data && result.data.componentModel) {
+                    const data = result.data;
+                    verificationRecord.status = "success";
+                    verificationRecord.moduleType = data.componentModel;
+                    verificationRecord.grade = data.grade;
+                    verificationRecord.queryTime = new Date().toISOString();
+                    verificationRecord.extraData = {
+                        pmax: data.pmax,
+                        voc: data.voc,
+                        isc: data.isc,
+                        vmp: data.vmp,
+                        imp: data.imp
+                    };
+                    
+                    let extraRows = '';
+                    if(data.pmax) extraRows += `<div class="info-row"><span>${t("pmax")}:</span><span>${data.pmax} Wp</span></div>`;
+                    if(data.voc) extraRows += `<div class="info-row"><span>${t("voc")}:</span><span>${data.voc} V</span></div>`;
+                    if(data.isc) extraRows += `<div class="info-row"><span>${t("isc")}:</span><span>${data.isc} A</span></div>`;
+                    if(data.vmp) extraRows += `<div class="info-row"><span>${t("vmp")}:</span><span>${data.vmp} V</span></div>`;
+                    if(data.imp) extraRows += `<div class="info-row"><span>${t("imp")}:</span><span>${data.imp} A</span></div>`;
+                    
+                    const successHtml = `
+                        <div class="result-card" style="direction: ${currentLang === 'ar' ? 'rtl' : 'ltr'};">
+                            <div class="badge"><i class="fas fa-check-circle" style="color:#10B981;"></i> ${t("successMessageAiko")}</div>
+                            <div class="info-row"><span>${t("serialNo")}:</span><span>${lotId.trim()}</span></div>
+                            <div class="info-row"><span>${t("moduleType")}:</span><span>${data.componentModel}</span></div>
+                            <div class="info-row"><span>${t("grade")}:</span><span>${data.grade || '—'}</span></div>
+                            ${extraRows}
+                            <div class="info-row"><span>${t("queryTime")}:</span><span>${new Date().toLocaleString()}</span></div>
+                        </div>
+                    `;
+                    if(resultContainer) resultContainer.innerHTML = successHtml;
+                    saveToHistory(verificationRecord);
+                    return verificationRecord;
+                } 
+                else {
+                    // data is null or code not 200 → fake panel
+                    verificationRecord.errorMessage = t("fakeWarningAiko");
+                    if(resultContainer) resultContainer.innerHTML = `<div class="result-card warning"><div class="badge"><i class="fas fa-skull-crosswalk"></i> ${t("fakeWarningAiko")}</div></div>`;
+                    showToast(t("fakeWarningAiko"));
+                    saveToHistory(verificationRecord);
+                    return verificationRecord;
+                }
+            } catch(err) {
+                console.error("AIKO verify error", err);
+                verificationRecord.errorMessage = t("networkError");
+                if(resultContainer) resultContainer.innerHTML = `<div class="result-card warning"><div class="badge"><i class="fas fa-wifi"></i> ${t("networkError")}</div></div>`;
+                showToast(t("networkError"));
+                saveToHistory(verificationRecord);
+                return verificationRecord;
             }
         }
-
-        function renderDeviceList(container) {
-            const title = t("deviceSelectTitle");
-            let html = `<h3 style="margin-bottom: 18px;">${title}</h3><div class="device-grid">`;
-            devicesList.forEach(dev => {
-                const devName = currentLang === "ar" ? dev.nameAr : dev.nameEn;
-                html += `
-                    <div class="device-card" data-device="${dev.id}">
-                        <i class="${dev.icon}"></i>
-                        <span>${devName}</span>
-                    </div>
-                `;
-            });
-            html += `</div>`;
-            container.innerHTML = html;
-            container.querySelectorAll(".device-card").forEach(card => {
-                card.addEventListener("click", (e) => {
-                    const deviceId = card.getAttribute("data-device");
-                    if(deviceId === "trina") {
-                        trinaViewState = "verificationForm";
-                        renderCurrentView();
-                    } else {
-                        showToast("Coming soon", 1200);
-                    }
-                });
-            });
-        }
-
-        function saveToHistory(record) {
-            let history = JSON.parse(localStorage.getItem("solar_history") || "[]");
-            history.unshift(record);
-            if(history.length > 20) history = history.slice(0,20);
-            localStorage.setItem("solar_history", JSON.stringify(history));
-        }
-
+        
+        // ========== TRINA VERIFICATION (existing) ==========
         async function performTrinaVerification(sn) {
             if(!sn || sn.trim() === "") {
                 showToast(t("serialRequired"));
@@ -906,7 +852,7 @@
                     
                     const successHtml = `
                         <div class="result-card" style="direction: ${currentLang === 'ar' ? 'rtl' : 'ltr'};">
-                            <div class="badge"><i class="fas fa-check-circle" style="color:#10B981;"></i> ${t("successMessage")}</div>
+                            <div class="badge"><i class="fas fa-check-circle" style="color:#10B981;"></i> ${t("successMessageTrina")}</div>
                             <div class="info-row"><span>${t("serialNo")}:</span><span>${data.serialNo || sn}</span></div>
                             <div class="info-row"><span>${t("moduleType")}:</span><span>${data.moduleType}</span></div>
                             <div class="info-row"><span>${t("grade")}:</span><span>${data.grade}</span></div>
@@ -916,9 +862,9 @@
                     if(resultContainer) resultContainer.innerHTML = successHtml;
                 } 
                 else {
-                    verificationRecord.errorMessage = t("fakeWarning");
-                    if(resultContainer) resultContainer.innerHTML = `<div class="result-card warning"><div class="badge"><i class="fas fa-skull-crosswalk"></i> ${t("fakeWarning")}</div></div>`;
-                    showToast(t("fakeWarning"));
+                    verificationRecord.errorMessage = t("fakeWarningTrina");
+                    if(resultContainer) resultContainer.innerHTML = `<div class="result-card warning"><div class="badge"><i class="fas fa-skull-crosswalk"></i> ${t("fakeWarningTrina")}</div></div>`;
+                    showToast(t("fakeWarningTrina"));
                 }
                 saveToHistory(verificationRecord);
             } catch(err) {
@@ -927,6 +873,22 @@
                 showToast(t("networkError"));
                 saveToHistory(verificationRecord);
             }
+        }
+        
+        // Generic handler based on device context
+        function handleVerification(deviceId, inputValue) {
+            if(deviceId === "trina") {
+                performTrinaVerification(inputValue);
+            } else if(deviceId === "aiko") {
+                performAikoVerification(inputValue);
+            }
+        }
+        
+        function saveToHistory(record) {
+            let history = JSON.parse(localStorage.getItem("solar_history") || "[]");
+            history.unshift(record);
+            if(history.length > 20) history = history.slice(0,20);
+            localStorage.setItem("solar_history", JSON.stringify(history));
         }
 
         function renderHistoryView(container) {
@@ -964,233 +926,98 @@
                 showToast(currentLang === "ar" ? "تم مسح السجل" : "History cleared");
             });
         }
-
-        function stopManualScanner() {
-            if(processingCapture) return;
-            if(window.quaggaInitialized) {
-                try { 
-                    if(window.Quagga) Quagga.stop();
-                } catch(e) {}
-                window.quaggaInitialized = false;
-            }
-            if(currentStream) {
-                currentStream.getTracks().forEach(track => track.stop());
-                currentStream = null;
-            }
-            const scannerDiv = document.getElementById("barcodeScannerContainer");
-            if(scannerDiv) scannerDiv.remove();
-            isScanning = false;
+        
+        function renderDeviceList(container) {
+            const title = t("deviceSelectTitle");
+            let html = `<h3 style="margin-bottom: 18px;">${title}</h3><div class="device-grid">`;
+            devicesList.forEach(dev => {
+                const devName = currentLang === "ar" ? dev.nameAr : dev.nameEn;
+                html += `
+                    <div class="device-card" data-device="${dev.id}">
+                        <i class="${dev.icon}"></i>
+                        <span>${devName}</span>
+                    </div>
+                `;
+            });
+            html += `</div>`;
+            container.innerHTML = html;
+            container.querySelectorAll(".device-card").forEach(card => {
+                card.addEventListener("click", (e) => {
+                    const deviceId = card.getAttribute("data-device");
+                    if(deviceId === "trina" || deviceId === "aiko") {
+                        currentDeviceContext = deviceId;
+                        renderVerificationForm(container, deviceId);
+                    } else {
+                        showToast("Coming soon", 1200);
+                    }
+                });
+            });
         }
         
-        function showProcessingOverlay(show, message = null) {
-            let overlay = document.querySelector(".processing-overlay");
-            if(show) {
-                if(!overlay) {
-                    overlay = document.createElement("div");
-                    overlay.className = "processing-overlay";
-                    overlay.innerHTML = `
-                        <div class="processing-spinner"></div>
-                        <div style="color:white; font-size:1rem;">${message || t("processing")}</div>
-                    `;
-                    const scannerContainer = document.getElementById("barcodeScannerContainer");
-                    if(scannerContainer) scannerContainer.appendChild(overlay);
-                }
-            } else {
-                if(overlay) overlay.remove();
-            }
-        }
-
-        async function captureAndDecode() {
-            if(processingCapture) {
-                showToast("Processing, please wait...");
-                return;
-            }
-            
-            const videoElement = document.querySelector("#interactive video");
-            if(!videoElement || videoElement.readyState < 2) {
-                showToast("Camera not ready");
-                return;
-            }
-            
-            processingCapture = true;
-            showProcessingOverlay(true);
-            
-            try {
-                const canvas = document.createElement("canvas");
-                canvas.width = videoElement.videoWidth;
-                canvas.height = videoElement.videoHeight;
-                const ctx = canvas.getContext("2d");
-                ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-                
-                const imageDataUrl = canvas.toDataURL("image/jpeg");
-                
-                // استخدام Quagga مع إعدادات محسنة
-                const result = await new Promise((resolve) => {
-                    Quagga.decodeSingle({
-                        src: imageDataUrl,
-                        numOfWorkers: 0,
-                        inputStream: { 
-                            size: 800,
-                            type: "ImageStream"
-                        },
-                        decoder: { 
-                            readers: [
-                                "code_128_reader",
-                                "ean_reader", 
-                                "ean_8_reader",
-                                "code_39_reader",
-                                "upc_reader",
-                                "codabar_reader",
-                                "code_93_reader"
-                            ] 
-                        },
-                        locator: {
-                            patchSize: "large",
-                            halfSample: true
-                        }
-                    }, function(result) {
-                        resolve(result);
-                    });
-                });
-                
-                showProcessingOverlay(false);
-                
-                if(result && result.codeResult) {
-                    const code = result.codeResult.code;
-                    if(code && code.length >= 4) {
-                        stopManualScanner();
-                        const snInput = document.getElementById("serialNumberInput");
-                        if(snInput) {
-                            snInput.value = code;
-                            performTrinaVerification(code);
-                        }
-                    } else {
-                        showToast("Invalid barcode, try again");
-                        setTimeout(() => stopManualScanner(), 1000);
-                    }
-                } else {
-                    showToast("No barcode detected, ensure it's inside rectangle and well-lit");
-                    setTimeout(() => stopManualScanner(), 1500);
-                }
-            } catch(error) {
-                console.error("Capture error:", error);
-                showProcessingOverlay(false);
-                showToast("Error processing barcode");
-                setTimeout(() => stopManualScanner(), 1000);
-            } finally {
-                processingCapture = false;
-            }
-        }
-
-        async function startManualScanner() {
-            if(isScanning) {
-                showToast("Scanner already open");
-                return;
-            }
-            
-            const scannerContainer = document.createElement("div");
-            scannerContainer.id = "barcodeScannerContainer";
-            scannerContainer.className = "scanner-container";
-            scannerContainer.innerHTML = `
-                <div class="scanner-header">
-                    <h3 style="color:white;">${t("scanButton")}</h3>
-                    <button class="close-scanner" id="closeScannerBtn"><i class="fas fa-times"></i> ${currentLang === 'ar' ? 'إغلاق' : 'Close'}</button>
-                </div>
-                <div class="scanner-view">
-                    <div id="interactive" class="viewport"></div>
-                    <div class="scan-guide-rect"></div>
-                    <div class="capture-overlay">
-                        <div class="capture-btn" id="manualCaptureBtn">
-                            <i class="fas fa-camera"></i>
-                        </div>
-                    </div>
-                    <div class="scanner-footer-text">${t("scanHint")}</div>
-                </div>
-            `;
-            document.body.appendChild(scannerContainer);
-            
-            const closeBtn = document.getElementById("closeScannerBtn");
-            closeBtn.onclick = () => stopManualScanner();
-            
-            Quagga.init({
-                inputStream: {
-                    name: "Live",
-                    type: "LiveStream",
-                    target: document.querySelector("#interactive"),
-                    constraints: { 
-                        facingMode: "environment",
-                        // width: { ideal: 1280 },
-                        // height: { ideal: 720 }
-                    }
-                },
-                locator: { patchSize: "medium", halfSample: true },
-                numOfWorkers: 0,
-                decoder: { readers: [] }
-            }, function(err) {
-                if (err) {
-                    console.error("Quagga init error:", err);
-                    showToast(t("cameraInitError"));
-                    stopManualScanner();
-                    return;
-                }
-                Quagga.start();
-                window.quaggaInitialized = true;
-                isScanning = true;
-                
-                setTimeout(() => {
-                    const video = document.querySelector("#interactive video");
-                    if(video && video.srcObject) {
-                        currentStream = video.srcObject;
-                    }
-                }, 500);
-            });
-            
-            const captureBtn = document.getElementById("manualCaptureBtn");
-            if(captureBtn) captureBtn.addEventListener("click", captureAndDecode);
-        }
-
-        function renderTrinaVerificationForm(container) {
+        function renderVerificationForm(container, deviceId) {
+            const isTrina = deviceId === "trina";
+            const deviceName = isTrina ? (currentLang === "ar" ? "ترينا" : "Trina") : "AIKO";
+            const placeholderHint = t("snPlaceholder");
             const formHtml = `
                 <button class="back-btn" id="backToDevicesBtn"><i class="fas fa-arrow-left"></i> ${t("backBtn")}</button>
                 <div class="verification-panel">
                     <div class="input-group">
                         <i class="fas fa-barcode"></i>
-                        <input type="text" id="serialNumberInput" placeholder="${t("snPlaceholder")}" autocomplete="off">
+                        <input type="text" id="serialNumberInput" placeholder="${placeholderHint}" autocomplete="off">
                     </div>
-                    <button class="scan-btn" id="scanBarcodeBtn"><i class="fas fa-camera"></i> ${t("scanButton")}</button>
+                    <div class="paste-hint"><i class="fas fa-paste"></i> ${t("pasteHint")}</div>
                     <button class="verify-btn" id="manualVerifyBtn"><i class="fas fa-shield-alt"></i> ${t("verifyButton")}</button>
-                    <div id="trinaResultArea"></div>
+                    <div id="${deviceId}ResultArea"></div>
                 </div>
             `;
             container.innerHTML = formHtml;
             document.getElementById("backToDevicesBtn").addEventListener("click", () => {
-                stopManualScanner();
-                trinaViewState = "deviceList";
+                currentDeviceContext = null;
                 renderCurrentView();
             });
             const snInput = document.getElementById("serialNumberInput");
             document.getElementById("manualVerifyBtn").addEventListener("click", () => {
                 const val = snInput.value.trim();
-                performTrinaVerification(val);
+                if(!val) { showToast(t("serialRequired")); return; }
+                handleVerification(deviceId, val);
             });
-            document.getElementById("scanBarcodeBtn").addEventListener("click", async () => {
-                if(isScanning) { showToast("Scanner already open"); return; }
-                await startManualScanner();
-            });
+            snInput.addEventListener("paste", () => { /* just for UX, no auto verify */ });
         }
-
+        
+        function renderCurrentView() {
+            const viewContainer = document.getElementById("dynamicView");
+            if(!viewContainer) return;
+            viewContainer.classList.add('view-wrapper');
+            if(activeTab === "verify") {
+                if(currentDeviceContext) {
+                    renderVerificationForm(viewContainer, currentDeviceContext);
+                } else {
+                    renderDeviceList(viewContainer);
+                }
+            } else if(activeTab === "calculator") {
+                viewContainer.innerHTML = `
+                 <a href="solar-designer.html" class="btn-primary" style="display: inline-block; padding: 14px 32px; text-decoration: none; color:unset; ">
+                <div class="calculator-placeholder"><i class="fas fa-calculator" style="font-size: 48px; color: var(--primary); margin-bottom: 16px; display: block;"></i><p style="font-size:16px">${t("calculatorMsg")}</p>
+                    </div></a>`;
+            } else if(activeTab === "guide") {
+                viewContainer.innerHTML = `<div class="guide-placeholder"><i class="fas fa-leaf" style="font-size: 48px; color: var(--primary); margin-bottom: 16px;"></i><p>${t("guideMsg")}</p><p style="margin-top:12px; font-size:0.85rem;">🔋 Trina Solar | AIKO | Longi references</p></div>`;
+            } else if(activeTab === "history") {
+                renderHistoryView(viewContainer);
+            }
+        }
+        
         function setLanguage(lang) {
             currentLang = lang;
             localStorage.setItem("app_lang", lang);
             applyDirection();
             updateUITexts();
         }
-
+        
         document.getElementById("langToggleBtn").addEventListener("click", () => {
             const newLang = currentLang === "ar" ? "en" : "ar";
             setLanguage(newLang);
         });
-
+        
         currentLang = loadStoredLang();
         applyDirection();
         renderBottomNav();
