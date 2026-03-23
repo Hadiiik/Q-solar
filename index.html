@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <title>SolarEco | Solar Tools</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://unpkg.com/@ericblade/quagga2@1.8.2/dist/quagga.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #DC8623;
+            --primary-dark: #b56c1c;
+            --secondary: #2E438F;
+            --secondary-dark: #1f2f63;
+            --bg-dark: #0B1120;
+            --surface: #111827;
+            --surface-light: #1F2937;
+            --text-primary: #F3F4F6;
+            --text-secondary: #9CA3AF;
+            --success: #10B981;
+            --danger: #EF4444;
+            --warning: #F59E0B;
+            --border: #2D3A4F;
+            --transition: all 0.2s ease;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            direction: ltr;
+            overflow-x: hidden;
+        }
+
+        body.rtl {
+            direction: rtl;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            background: var(--surface);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-shadow: 0 0 40px rgba(0,0,0,0.5);
+            border-radius: 0;
+            overflow-x: hidden;
+        }
+
+        .header {
+            background: var(--primary);
+            padding: 18px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom-left-radius: 24px;
+            border-bottom-right-radius: 24px;
+            box-shadow: 0 6px 14px rgba(0,0,0,0.3);
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="%23FFFFFF"/><polygon points="50,20 60,40 80,45 65,60 68,80 50,70 32,80 35,60 20,45 40,40 50,20" fill="%23DC8623"/><circle cx="50" cy="50" r="12" fill="%23FFB347"/></svg>');
+            background-size: contain;
+            background-repeat: no-repeat;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+        }
+
+        .logo-area h1 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            color: white;
+        }
+
+        .lang-toggle {
+            background: var(--secondary);
+            border: none;
+            width: 42px;
+            height: 42px;
+            border-radius: 30px;
+            color: white;
+            font-size: 1.3rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .lang-toggle:active {
+            transform: scale(0.96);
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 20px 18px;
+            overflow-y: auto;
+            padding-bottom: 80px;
+        }
+
+        .view-wrapper {
+            animation: slideIn 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        body.rtl .view-wrapper {
+            animation: slideInRTL 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+        }
+
+        @keyframes slideInRTL {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            max-width: 500px;
+            width: 100%;
+            background: var(--surface-light);
+            display: flex;
+            justify-content: space-around;
+            border-top: 1px solid var(--border);
+            padding: 8px 12px 12px;
+            z-index: 20;
+            border-radius: 28px 28px 0 0;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            font-weight: 500;
+            transition: var(--transition);
+            cursor: pointer;
+            padding: 6px 12px;
+            border-radius: 40px;
+            flex: 1;
+        }
+
+        .nav-item i {
+            font-size: 1.6rem;
+        }
+
+        .nav-item.active {
+            color: var(--primary);
+            background: rgba(220,134,35,0.15);
+        }
+
+        .device-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            margin-top: 10px;
+        }
+
+        .device-card {
+            background: var(--surface-light);
+            border-radius: 28px;
+            padding: 28px 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s;
+            border: 1px solid var(--border);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        .device-card i {
+            font-size: 3.2rem;
+            color: var(--primary);
+            margin-bottom: 12px;
+        }
+
+        .device-card span {
+            font-size: 1.2rem;
+            font-weight: 600;
+            display: block;
+        }
+
+        .device-card:active {
+            transform: scale(0.97);
+            background: var(--surface);
+        }
+
+        .verification-panel {
+            animation: fadeSlide 0.25s ease;
+        }
+
+        .back-btn {
+            background: transparent;
+            border: none;
+            color: var(--primary);
+            font-size: 1rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+            cursor: pointer;
+        }
+
+        .input-group {
+            background: var(--surface-light);
+            border-radius: 48px;
+            padding: 4px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .input-group i {
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+
+        .input-group input {
+            background: transparent;
+            border: none;
+            padding: 14px 0;
+            flex: 1;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .scan-btn, .verify-btn {
+            border: none;
+            width: 100%;
+            padding: 14px;
+            border-radius: 48px;
+            font-weight: bold;
+            font-size: 1rem;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .scan-btn {
+            background: var(--secondary);
+        }
+
+        .verify-btn {
+            background: var(--primary);
+        }
+
+        .scan-btn:active, .verify-btn:active {
+            opacity: 0.8;
+            transform: scale(0.98);
+        }
+
+        .result-card {
+            background: var(--surface-light);
+            border-radius: 28px;
+            padding: 20px;
+            margin-top: 20px;
+            border-left: 5px solid var(--success);
+            animation: successGlow 0.5s ease-out, fadeUp 0.4s cubic-bezier(0.34, 1.2, 0.64, 1);
+            transform-origin: center;
+        }
+
+        @keyframes successGlow {
+            0% {
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+                transform: scale(0.95);
+                opacity: 0;
+            }
+            50% {
+                box-shadow: 0 0 0 12px rgba(16, 185, 129, 0.2);
+                transform: scale(1.02);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .result-card.warning {
+            border-left-color: var(--danger);
+            animation: warningShake 0.4s ease-out;
+        }
+
+        @keyframes warningShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: bold;
+            margin-bottom: 12px;
+            animation: badgePop 0.3s cubic-bezier(0.34, 1.2, 0.64, 1) 0.2s both;
+        }
+
+        @keyframes badgePop {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+            font-size: 0.9rem;
+            animation: fadeInRow 0.3s ease-out forwards;
+            opacity: 0;
+            transform: translateY(5px);
+        }
+
+        .info-row:nth-child(2) { animation-delay: 0.05s; }
+        .info-row:nth-child(3) { animation-delay: 0.1s; }
+        .info-row:nth-child(4) { animation-delay: 0.15s; }
+        .info-row:nth-child(5) { animation-delay: 0.2s; }
+
+        @keyframes fadeInRow {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .loader {
+            border: 3px solid rgba(220,134,35,0.3);
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 0.8s linear infinite;
+            display: inline-block;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 90px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--surface-light);
+            backdrop-filter: blur(12px);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 60px;
+            font-size: 0.85rem;
+            z-index: 200;
+            max-width: 85%;
+            text-align: center;
+            pointer-events: none;
+            animation: toastSlide 0.3s ease-out;
+        }
+
+        @keyframes toastSlide {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            margin-top: 15px;
+        }
+
+        .history-item {
+            background: var(--surface-light);
+            border-radius: 20px;
+            padding: 12px 16px;
+            border-right: 3px solid var(--primary);
+            animation: fadeSlide 0.3s ease-out;
+        }
+
+        .history-item.failed {
+            border-right-color: var(--danger);
+            opacity: 0.85;
+        }
+
+        .clear-history {
+            background: rgba(239,68,68,0.2);
+            border: 1px solid var(--danger);
+            color: var(--danger);
+            padding: 10px;
+            border-radius: 40px;
+            width: 100%;
+            margin-top: 20px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .guide-placeholder {
+            text-align: center;
+            padding: 40px 20px;
+            background: var(--surface-light);
+            border-radius: 32px;
+        }
+
+        .calculator-placeholder {
+            text-align: center;
+            padding: 40px 20px;
+            background: var(--surface-light);
+            border-radius: 32px;
+        }
+
+        .scanner-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .scanner-header {
+            padding: 20px;
+            background: rgba(0,0,0,0.85);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .close-scanner {
+            background: var(--danger);
+            border: none;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        .scanner-view {
+            flex: 1;
+            position: relative;
+            background: #000;
+            overflow: hidden;
+        }
+
+        #interactive {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .capture-overlay {
+            position: absolute;
+            bottom: 40px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            z-index: 1001;
+        }
+
+        .capture-btn {
+            background: var(--primary);
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 4px solid white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            transition: transform 0.2s;
+        }
+
+        .capture-btn:active {
+            transform: scale(0.92);
+        }
+
+        .capture-btn i {
+            font-size: 2.5rem;
+            color: white;
+        }
+
+        .scan-guide-rect {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 75%;
+            max-width: 280px;
+            height: 180px;
+            border: 3px solid rgba(220,134,35,0.9);
+            border-radius: 20px;
+            box-shadow: 0 0 0 2000px rgba(0,0,0,0.5);
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .scanner-footer-text {
+            position: absolute;
+            bottom: 120px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            color: white;
+            background: rgba(0,0,0,0.6);
+            padding: 6px;
+            font-size: 0.8rem;
+            z-index: 1001;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes fadeSlide { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+        body.rtl .info-row { flex-direction: row-reverse; }
+        body.rtl .back-btn i { transform: rotate(180deg); }
+        .hidden { display: none; }
+        
+        .processing-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1002;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .processing-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--primary);
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+    </style>
+</head>
+<body>
+<div class="app-container" id="appContainer">
+    <div class="header">
+        <div class="logo-area">
+            <div class="logo-icon"></div>
+            <h1 id="appTitle">SolarEco</h1>
+        </div>
+        <button class="lang-toggle" id="langToggleBtn"><i class="fas fa-globe"></i></button>
+    </div>
+    <div class="main-content" id="mainContent">
+        <div id="dynamicView" class="view-wrapper"></div>
+    </div>
+    <div class="bottom-nav" id="bottomNav"></div>
+</div>
+<script>
+    (function(){
+        const translations = {
+            ar: {
+                appName: "سولار إيكو",
+                tabs: [
+                    { id: "verify", name: "التحقق", icon: "fas fa-check-circle" },
+                    { id: "calculator", name: "الحاسبة", icon: "fas fa-calculator" },
+                    { id: "guide", name: "الدليل", icon: "fas fa-book-open" },
+                    { id: "history", name: "السجل", icon: "fas fa-history" }
+                ],
+                devices: [{ id: "trina", name: "ألواح ترينا", icon: "fas fa-solar-panel" }],
+                backBtn: "رجوع",
+                snPlaceholder: "أدخل الرقم التسلسلي SN",
+                scanButton: "تصوير الباركود",
+                verifyButton: "تحقق",
+                successMessage: "✓ اللوح أصلي ومعتمد من ترينا",
+                fakeWarning: "⚠ تحذير: هذا اللوح غير أصلي أو غير تابع لشركة ترينا",
+                error500: "تم إرسال طلبات كثيرة متتابعة، يرجى المحاولة بعد دقيقة",
+                networkError: "حدث خطأ في الاتصال، يرجى المحاولة مرة أخرى",
+                loading: "جار التحقق...",
+                cameraInitError: "تعذر تشغيل الكاميرا",
+                serialRequired: "الرجاء إدخال الرقم التسلسلي",
+                historyEmpty: "لا توجد عمليات تحقق بعد",
+                clearHistory: "مسح السجل",
+                moduleType: "نوع الوحدة",
+                grade: "الدرجة",
+                queryTime: "وقت الاستعلام",
+                serialNo: "الرقم التسلسلي",
+                calculatorMsg: "🧮 أداة الحاسبة قريباً: تقدير إنتاج الطاقة وتوفير التكاليف",
+                guideMsg: "📘 دليل الطاقة الشمسية: نصائح حول تركيب الألواح وصيانتها ومطابقة المحولات",
+                deviceSelectTitle: "اختر جهازاً للتحقق",
+                statusFailed: "❌ غير معتمد",
+                statusSuccess: "✓ معتمد",
+                scanHint: "ضع الباركود داخل المستطيل ثم اضغط زر التصوير",
+                processing: "جاري معالجة الباركود..."
+            },
+            en: {
+                appName: "SolarEco",
+                tabs: [
+                    { id: "verify", name: "Verify", icon: "fas fa-check-circle" },
+                    { id: "calculator", name: "Calculator", icon: "fas fa-calculator" },
+                    { id: "guide", name: "Guide", icon: "fas fa-book-open" },
+                    { id: "history", name: "History", icon: "fas fa-history" }
+                ],
+                devices: [{ id: "trina", name: "Trina Solar Panels", icon: "fas fa-solar-panel" }],
+                backBtn: "Back",
+                snPlaceholder: "Enter Serial Number (SN)",
+                scanButton: "Capture Barcode",
+                verifyButton: "Verify",
+                successMessage: "✓ Panel is genuine & certified by Trina Solar",
+                fakeWarning: "⚠ Warning: This panel is not genuine or not from Trina Solar",
+                error500: "Too many requests, please try again after a minute",
+                networkError: "Connection error, please try again",
+                loading: "Verifying...",
+                cameraInitError: "Camera failed to start",
+                serialRequired: "Please enter serial number",
+                historyEmpty: "No verification records yet",
+                clearHistory: "Clear History",
+                moduleType: "Module Type",
+                grade: "Grade",
+                queryTime: "Query Time",
+                serialNo: "Serial No.",
+                calculatorMsg: "🧮 Calculator Tool: Estimate energy yield & savings (coming soon)",
+                guideMsg: "📘 Solar Guide: Installation tips, inverter matching & maintenance",
+                deviceSelectTitle: "Select a device to verify",
+                statusFailed: "❌ Not Certified",
+                statusSuccess: "✓ Certified",
+                scanHint: "Place barcode inside rectangle and press capture",
+                processing: "Processing barcode..."
+            }
+        };
+
+        const tabsConfig = [
+            { id: "verify", icon: "fas fa-check-circle", nameAr: "التحقق", nameEn: "Verify" },
+            { id: "calculator", icon: "fas fa-calculator", nameAr: "الحاسبة", nameEn: "Calculator" },
+            { id: "guide", icon: "fas fa-book-open", nameAr: "الدليل", nameEn: "Guide" },
+            { id: "history", icon: "fas fa-history", nameAr: "السجل", nameEn: "History" }
+        ];
+
+        const devicesList = [
+            { id: "trina", icon: "fas fa-solar-panel", nameAr: "ألواح ترينا", nameEn: "Trina Solar Panels" }
+        ];
+
+        let currentLang = "ar";
+        let activeTab = "verify";
+        let trinaViewState = "deviceList";
+        let touchStartX = 0;
+        let touchEndX = 0;
+        let isScanning = false;
+        let currentStream = null;
+        let processingCapture = false;
+
+        function isEmptyValue(value) {
+            if(value === null || value === undefined) return true;
+            if(typeof value === 'string' && value.trim() === '') return true;
+            return false;
+        }
+
+        function getLangFromBrowser() {
+            const browserLang = navigator.language || navigator.userLanguage;
+            if(browserLang.startsWith('ar')) return "ar";
+            return "en";
+        }
+
+        function loadStoredLang() {
+            const stored = localStorage.getItem("app_lang");
+            if(stored === "ar" || stored === "en") return stored;
+            return getLangFromBrowser();
+        }
+
+        function applyDirection() {
+            const isRtl = currentLang === "ar";
+            document.body.classList.toggle("rtl", isRtl);
+            const container = document.getElementById("appContainer");
+            if(container) container.style.direction = isRtl ? "rtl" : "ltr";
+        }
+
+        function t(key) {
+            const dict = translations[currentLang];
+            if(!dict) return key;
+            return dict[key] || key;
+        }
+
+        function updateUITexts() {
+            document.getElementById("appTitle").innerText = t("appName");
+            renderBottomNav();
+            renderCurrentView();
+        }
+
+        function switchTabWithAnimation(newTabId) {
+            if(newTabId === activeTab) return;
+            const viewWrapper = document.querySelector('.view-wrapper');
+            if(viewWrapper) {
+                viewWrapper.style.animation = 'none';
+                viewWrapper.offsetHeight;
+                viewWrapper.style.animation = 'slideIn 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)';
+                if(currentLang === 'ar') {
+                    viewWrapper.style.animation = 'slideInRTL 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)';
+                }
+            }
+            activeTab = newTabId;
+            if(activeTab === "verify") trinaViewState = "deviceList";
+            renderCurrentView();
+            renderBottomNav();
+        }
+
+        function renderBottomNav() {
+            const navContainer = document.getElementById("bottomNav");
+            if(!navContainer) return;
+            navContainer.innerHTML = "";
+            tabsConfig.forEach(tab => {
+                const btn = document.createElement("button");
+                btn.className = `nav-item ${activeTab === tab.id ? 'active' : ''}`;
+                const label = currentLang === "ar" ? tab.nameAr : tab.nameEn;
+                btn.innerHTML = `<i class="${tab.icon}"></i><span>${label}</span>`;
+                btn.onclick = () => switchTabWithAnimation(tab.id);
+                navContainer.appendChild(btn);
+            });
+        }
+
+        function initSwipeDetection() {
+            const mainContent = document.getElementById("mainContent");
+            mainContent.addEventListener('touchstart', (e) => {
+                touchStartX = e.changedTouches[0].screenX;
+            });
+            mainContent.addEventListener('touchend', (e) => {
+                touchEndX = e.changedTouches[0].screenX;
+                const swipeDistance = touchEndX - touchStartX;
+                const minSwipeDistance = 50;
+                if(Math.abs(swipeDistance) < minSwipeDistance) return;
+                const currentIndex = tabsConfig.findIndex(t => t.id === activeTab);
+                if(swipeDistance < 0 && currentIndex > 0) {
+                    switchTabWithAnimation(tabsConfig[currentIndex - 1].id);
+                } else if(swipeDistance > 0 && currentIndex < tabsConfig.length - 1) {
+                    switchTabWithAnimation(tabsConfig[currentIndex + 1].id);
+                }
+            });
+        }
+
+        function showToast(message, duration = 3000) {
+            let toast = document.querySelector(".toast");
+            if(toast) toast.remove();
+            const div = document.createElement("div");
+            div.className = "toast";
+            div.innerText = message;
+            document.body.appendChild(div);
+            setTimeout(() => div.remove(), duration);
+        }
+
+        function renderCurrentView() {
+            const viewContainer = document.getElementById("dynamicView");
+            if(!viewContainer) return;
+            viewContainer.classList.add('view-wrapper');
+            if(activeTab === "verify") {
+                if(trinaViewState === "deviceList") {
+                    renderDeviceList(viewContainer);
+                } else {
+                    renderTrinaVerificationForm(viewContainer);
+                }
+            } else if(activeTab === "calculator") {
+                viewContainer.innerHTML = `<div class="calculator-placeholder"><i class="fas fa-calculator" style="font-size: 48px; color: var(--primary); margin-bottom: 16px; display: block;"></i><p>${t("calculatorMsg")}</p></div>`;
+            } else if(activeTab === "guide") {
+                viewContainer.innerHTML = `<div class="guide-placeholder"><i class="fas fa-leaf" style="font-size: 48px; color: var(--primary); margin-bottom: 16px;"></i><p>${t("guideMsg")}</p><p style="margin-top:12px; font-size:0.85rem;">🔋 Trina Solar | Jinko | Longi references</p></div>`;
+            } else if(activeTab === "history") {
+                renderHistoryView(viewContainer);
+            }
+        }
+
+        function renderDeviceList(container) {
+            const title = t("deviceSelectTitle");
+            let html = `<h3 style="margin-bottom: 18px;">${title}</h3><div class="device-grid">`;
+            devicesList.forEach(dev => {
+                const devName = currentLang === "ar" ? dev.nameAr : dev.nameEn;
+                html += `
+                    <div class="device-card" data-device="${dev.id}">
+                        <i class="${dev.icon}"></i>
+                        <span>${devName}</span>
+                    </div>
+                `;
+            });
+            html += `</div>`;
+            container.innerHTML = html;
+            container.querySelectorAll(".device-card").forEach(card => {
+                card.addEventListener("click", (e) => {
+                    const deviceId = card.getAttribute("data-device");
+                    if(deviceId === "trina") {
+                        trinaViewState = "verificationForm";
+                        renderCurrentView();
+                    } else {
+                        showToast("Coming soon", 1200);
+                    }
+                });
+            });
+        }
+
+        function saveToHistory(record) {
+            let history = JSON.parse(localStorage.getItem("solar_history") || "[]");
+            history.unshift(record);
+            if(history.length > 20) history = history.slice(0,20);
+            localStorage.setItem("solar_history", JSON.stringify(history));
+        }
+
+        async function performTrinaVerification(sn) {
+            if(!sn || sn.trim() === "") {
+                showToast(t("serialRequired"));
+                return;
+            }
+            const resultContainer = document.getElementById("trinaResultArea");
+            if(resultContainer) resultContainer.innerHTML = `<div style="text-align:center; padding:20px;"><div class="loader"></div><p>${t("loading")}</p></div>`;
+            
+            let verificationRecord = {
+                deviceType: "Trina",
+                serialNo: sn.trim(),
+                timestamp: Date.now(),
+                status: "failed",
+                moduleType: null,
+                grade: null,
+                queryTime: null,
+                errorMessage: null
+            };
+            
+            try {
+                const response = await fetch(`https://customerserviceapi.trinasolar.com/recaptcha/mes/module/query?sn=${encodeURIComponent(sn)}`);
+                if(response.status === 500) {
+                    verificationRecord.errorMessage = t("error500");
+                    if(resultContainer) resultContainer.innerHTML = `<div class="result-card warning"><div class="badge"><i class="fas fa-exclamation-triangle"></i> ${t("error500")}</div></div>`;
+                    showToast(t("error500"));
+                    saveToHistory(verificationRecord);
+                    return;
+                }
+                const d = await response.json();
+                const data = d.data && d.data[0] ? d.data[0] : {};
+                
+                if(d.code!==200){
+                   verificationRecord.errorMessage = t("networkError");
+                    if(resultContainer) resultContainer.innerHTML = `<div class="result-card warning"><div class="badge"><i class="fas fa-wifi"></i> ${t("networkError")}</div></div>`;
+                    showToast(t("networkError"));
+                    saveToHistory(verificationRecord); 
+                    return;
+                }
+                
+                if(d.code === 200 && (!isEmptyValue(data.grade) || !isEmptyValue(data.moduleType))) {
+                    verificationRecord.status = "success";
+                    verificationRecord.moduleType = data.moduleType;
+                    verificationRecord.grade = data.grade;
+                    verificationRecord.queryTime = data.queryTime || new Date().toISOString();
+                    verificationRecord.serialNo = data.serialNo || sn;
+                    
+                    const successHtml = `
+                        <div class="result-card" style="direction: ${currentLang === 'ar' ? 'rtl' : 'ltr'};">
+                            <div class="badge"><i class="fas fa-check-circle" style="color:#10B981;"></i> ${t("successMessage")}</div>
+                            <div class="info-row"><span>${t("serialNo")}:</span><span>${data.serialNo || sn}</span></div>
+                            <div class="info-row"><span>${t("moduleType")}:</span><span>${data.moduleType}</span></div>
+                            <div class="info-row"><span>${t("grade")}:</span><span>${data.grade}</span></div>
+                            <div class="info-row"><span>${t("queryTime")}:</span><span>${data.queryTime || new Date().toLocaleString()}</span></div>
+                        </div>
+                    `;
+                    if(resultContainer) resultContainer.innerHTML = successHtml;
+                } 
+                else {
+                    verificationRecord.errorMessage = t("fakeWarning");
+                    if(resultContainer) resultContainer.innerHTML = `<div class="result-card warning"><div class="badge"><i class="fas fa-skull-crosswalk"></i> ${t("fakeWarning")}</div></div>`;
+                    showToast(t("fakeWarning"));
+                }
+                saveToHistory(verificationRecord);
+            } catch(err) {
+                verificationRecord.errorMessage = t("networkError");
+                if(resultContainer) resultContainer.innerHTML = `<div class="result-card warning"><div class="badge"><i class="fas fa-wifi"></i> ${t("networkError")}</div></div>`;
+                showToast(t("networkError"));
+                saveToHistory(verificationRecord);
+            }
+        }
+
+        function renderHistoryView(container) {
+            let history = JSON.parse(localStorage.getItem("solar_history") || "[]");
+            let html = `<h3>${currentLang === 'ar' ? 'سجل التحقق' : 'Verification History'}</h3>`;
+            if(history.length === 0) {
+                html += `<div class="guide-placeholder" style="margin-top:20px;"><i class="fas fa-database"></i><p>${t("historyEmpty")}</p></div>`;
+            } else {
+                html += `<div class="history-list">`;
+                history.forEach(item => {
+                    const date = new Date(item.timestamp).toLocaleString(currentLang === 'ar' ? 'ar-EG' : 'en-US');
+                    const isSuccess = item.status === "success";
+                    const statusText = isSuccess ? t("statusSuccess") : t("statusFailed");
+                    const statusIcon = isSuccess ? '<i class="fas fa-check-circle" style="color:var(--success);"></i>' : '<i class="fas fa-times-circle" style="color:var(--danger);"></i>';
+                    const failedClass = isSuccess ? '' : 'failed';
+                    
+                    html += `
+                        <div class="history-item ${failedClass}">
+                            <div>${statusIcon} <strong>${item.deviceType}</strong> <span style="float: ${currentLang === 'ar' ? 'left' : 'right'};">${statusText}</span></div>
+                            <div><small>${t("serialNo")}: ${item.serialNo}</small></div>
+                            ${item.moduleType ? `<div><small>${t("moduleType")}: ${item.moduleType}</small></div>` : ''}
+                            ${item.grade ? `<div><small>${t("grade")}: ${item.grade}</small></div>` : ''}
+                            ${item.errorMessage ? `<div><small style="color:var(--danger);">${item.errorMessage}</small></div>` : ''}
+                            <div><small>${date}</small></div>
+                        </div>
+                    `;
+                });
+                html += `</div><button id="clearHistoryBtn" class="clear-history"><i class="fas fa-trash-alt"></i> ${t("clearHistory")}</button>`;
+            }
+            container.innerHTML = html;
+            const clearBtn = document.getElementById("clearHistoryBtn");
+            if(clearBtn) clearBtn.addEventListener("click", () => {
+                localStorage.removeItem("solar_history");
+                renderHistoryView(container);
+                showToast(currentLang === "ar" ? "تم مسح السجل" : "History cleared");
+            });
+        }
+
+        function stopManualScanner() {
+            if(processingCapture) return;
+            if(window.quaggaInitialized) {
+                try { 
+                    if(window.Quagga) Quagga.stop();
+                } catch(e) {}
+                window.quaggaInitialized = false;
+            }
+            if(currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
+                currentStream = null;
+            }
+            const scannerDiv = document.getElementById("barcodeScannerContainer");
+            if(scannerDiv) scannerDiv.remove();
+            isScanning = false;
+        }
+        
+        function showProcessingOverlay(show, message = null) {
+            let overlay = document.querySelector(".processing-overlay");
+            if(show) {
+                if(!overlay) {
+                    overlay = document.createElement("div");
+                    overlay.className = "processing-overlay";
+                    overlay.innerHTML = `
+                        <div class="processing-spinner"></div>
+                        <div style="color:white; font-size:1rem;">${message || t("processing")}</div>
+                    `;
+                    const scannerContainer = document.getElementById("barcodeScannerContainer");
+                    if(scannerContainer) scannerContainer.appendChild(overlay);
+                }
+            } else {
+                if(overlay) overlay.remove();
+            }
+        }
+
+        async function captureAndDecode() {
+            if(processingCapture) {
+                showToast("Processing, please wait...");
+                return;
+            }
+            
+            const videoElement = document.querySelector("#interactive video");
+            if(!videoElement || videoElement.readyState < 2) {
+                showToast("Camera not ready");
+                return;
+            }
+            
+            processingCapture = true;
+            showProcessingOverlay(true);
+            
+            try {
+                const canvas = document.createElement("canvas");
+                canvas.width = videoElement.videoWidth;
+                canvas.height = videoElement.videoHeight;
+                const ctx = canvas.getContext("2d");
+                ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+                
+                const imageDataUrl = canvas.toDataURL("image/jpeg");
+                
+                // استخدام Quagga مع إعدادات محسنة
+                const result = await new Promise((resolve) => {
+                    Quagga.decodeSingle({
+                        src: imageDataUrl,
+                        numOfWorkers: 0,
+                        inputStream: { 
+                            size: 800,
+                            type: "ImageStream"
+                        },
+                        decoder: { 
+                            readers: [
+                                "code_128_reader",
+                                "ean_reader", 
+                                "ean_8_reader",
+                                "code_39_reader",
+                                "upc_reader",
+                                "codabar_reader",
+                                "code_93_reader"
+                            ] 
+                        },
+                        locator: {
+                            patchSize: "large",
+                            halfSample: true
+                        }
+                    }, function(result) {
+                        resolve(result);
+                    });
+                });
+                
+                showProcessingOverlay(false);
+                
+                if(result && result.codeResult) {
+                    const code = result.codeResult.code;
+                    if(code && code.length >= 4) {
+                        stopManualScanner();
+                        const snInput = document.getElementById("serialNumberInput");
+                        if(snInput) {
+                            snInput.value = code;
+                            performTrinaVerification(code);
+                        }
+                    } else {
+                        showToast("Invalid barcode, try again");
+                        setTimeout(() => stopManualScanner(), 1000);
+                    }
+                } else {
+                    showToast("No barcode detected, ensure it's inside rectangle and well-lit");
+                    setTimeout(() => stopManualScanner(), 1500);
+                }
+            } catch(error) {
+                console.error("Capture error:", error);
+                showProcessingOverlay(false);
+                showToast("Error processing barcode");
+                setTimeout(() => stopManualScanner(), 1000);
+            } finally {
+                processingCapture = false;
+            }
+        }
+
+        async function startManualScanner() {
+            if(isScanning) {
+                showToast("Scanner already open");
+                return;
+            }
+            
+            const scannerContainer = document.createElement("div");
+            scannerContainer.id = "barcodeScannerContainer";
+            scannerContainer.className = "scanner-container";
+            scannerContainer.innerHTML = `
+                <div class="scanner-header">
+                    <h3 style="color:white;">${t("scanButton")}</h3>
+                    <button class="close-scanner" id="closeScannerBtn"><i class="fas fa-times"></i> ${currentLang === 'ar' ? 'إغلاق' : 'Close'}</button>
+                </div>
+                <div class="scanner-view">
+                    <div id="interactive" class="viewport"></div>
+                    <div class="scan-guide-rect"></div>
+                    <div class="capture-overlay">
+                        <div class="capture-btn" id="manualCaptureBtn">
+                            <i class="fas fa-camera"></i>
+                        </div>
+                    </div>
+                    <div class="scanner-footer-text">${t("scanHint")}</div>
+                </div>
+            `;
+            document.body.appendChild(scannerContainer);
+            
+            const closeBtn = document.getElementById("closeScannerBtn");
+            closeBtn.onclick = () => stopManualScanner();
+            
+            Quagga.init({
+                inputStream: {
+                    name: "Live",
+                    type: "LiveStream",
+                    target: document.querySelector("#interactive"),
+                    constraints: { 
+                        facingMode: "environment",
+                        // width: { ideal: 1280 },
+                        // height: { ideal: 720 }
+                    }
+                },
+                locator: { patchSize: "medium", halfSample: true },
+                numOfWorkers: 0,
+                decoder: { readers: [] }
+            }, function(err) {
+                if (err) {
+                    console.error("Quagga init error:", err);
+                    showToast(t("cameraInitError"));
+                    stopManualScanner();
+                    return;
+                }
+                Quagga.start();
+                window.quaggaInitialized = true;
+                isScanning = true;
+                
+                setTimeout(() => {
+                    const video = document.querySelector("#interactive video");
+                    if(video && video.srcObject) {
+                        currentStream = video.srcObject;
+                    }
+                }, 500);
+            });
+            
+            const captureBtn = document.getElementById("manualCaptureBtn");
+            if(captureBtn) captureBtn.addEventListener("click", captureAndDecode);
+        }
+
+        function renderTrinaVerificationForm(container) {
+            const formHtml = `
+                <button class="back-btn" id="backToDevicesBtn"><i class="fas fa-arrow-left"></i> ${t("backBtn")}</button>
+                <div class="verification-panel">
+                    <div class="input-group">
+                        <i class="fas fa-barcode"></i>
+                        <input type="text" id="serialNumberInput" placeholder="${t("snPlaceholder")}" autocomplete="off">
+                    </div>
+                    <button class="scan-btn" id="scanBarcodeBtn"><i class="fas fa-camera"></i> ${t("scanButton")}</button>
+                    <button class="verify-btn" id="manualVerifyBtn"><i class="fas fa-shield-alt"></i> ${t("verifyButton")}</button>
+                    <div id="trinaResultArea"></div>
+                </div>
+            `;
+            container.innerHTML = formHtml;
+            document.getElementById("backToDevicesBtn").addEventListener("click", () => {
+                stopManualScanner();
+                trinaViewState = "deviceList";
+                renderCurrentView();
+            });
+            const snInput = document.getElementById("serialNumberInput");
+            document.getElementById("manualVerifyBtn").addEventListener("click", () => {
+                const val = snInput.value.trim();
+                performTrinaVerification(val);
+            });
+            document.getElementById("scanBarcodeBtn").addEventListener("click", async () => {
+                if(isScanning) { showToast("Scanner already open"); return; }
+                await startManualScanner();
+            });
+        }
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem("app_lang", lang);
+            applyDirection();
+            updateUITexts();
+        }
+
+        document.getElementById("langToggleBtn").addEventListener("click", () => {
+            const newLang = currentLang === "ar" ? "en" : "ar";
+            setLanguage(newLang);
+        });
+
+        currentLang = loadStoredLang();
+        applyDirection();
+        renderBottomNav();
+        renderCurrentView();
+        setLanguage(currentLang);
+        initSwipeDetection();
+    })();
+</script>
+</body>
+</html>
