@@ -1,0 +1,19 @@
+  html, body {
+    touch-action: manipulation; /* helps prevent double-tap zoom and pinch handling */
+    -ms-touch-action: manipulation;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent; /* remove tap highlight */
+  }
+
+  /* Still allow text input selection and links to be selectable/clickable */
+  input, textarea, select, a, button {
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+  }

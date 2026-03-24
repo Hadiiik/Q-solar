@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="global.css">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#667eea">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -723,21 +724,76 @@
             return { voltage: 12, capacity: cap };
         }
     }
-    function applySmartComponentDefaults() {
+        function applySmartComponentDefaults() {
         const { totalEnergy } = calculateEnergy();
         if(devices.length === 0) return;
+        
         const estimatedPV = computeEstimatedPVPower();
         const recommendedPanelPower = getRecommendedPanelPower(estimatedPV);
         const recommendedSysVoltage = getRecommendedSystemVoltage(estimatedPV);
         const battSpecs = getRecommendedBatterySpecs(estimatedPV, recommendedSysVoltage, totalEnergy);
-        componentSettings.panelPower = recommendedPanelPower;
-        componentSettings.systemVoltage = null; // auto by default, but we prefill battery voltage/capacity
-        componentSettings.batteryCapacity = battSpecs.capacity;
-        componentSettings.batteryVoltage = battSpecs.voltage;
-        if(recommendedSysVoltage === 48) componentSettings.panelVoltage = 48;
-        else if(recommendedSysVoltage === 24) componentSettings.panelVoltage = 24;
-        else componentSettings.panelVoltage = 24;
-        componentSettings.panelArea = (recommendedPanelPower <= 400) ? 1.8 : (recommendedPanelPower <= 550 ? 2.2 : 2.6);
+        
+        // Get the input elements
+        const panelPowerInput = document.getElementById("panelPower");
+        const panelVoltageInput = document.getElementById("panelVoltage");
+        const panelAreaInput = document.getElementById("panelArea");
+        const batteryCapacityInput = document.getElementById("batteryCapacity");
+        const batteryVoltageInput = document.getElementById("batteryVoltage");
+        const systemVoltageSelect = document.getElementById("systemVoltage");
+        
+        // Set placeholder values or default values in inputs without applying to componentSettings
+        if(panelPowerInput) {
+            panelPowerInput.placeholder = `${recommendedPanelPower} Wp (موصى به)`;
+            if(panelPowerInput.value === "" || parseFloat(panelPowerInput.value) === 0) {
+                panelPowerInput.value = recommendedPanelPower;
+            }
+        }
+        
+        let recommendedPanelVoltage = 24;
+        if(recommendedSysVoltage === 48) recommendedPanelVoltage = 48;
+        else if(recommendedSysVoltage === 24) recommendedPanelVoltage = 24;
+        else recommendedPanelVoltage = 24;
+        
+        if(panelVoltageInput) {
+            panelVoltageInput.placeholder = `${recommendedPanelVoltage} V (موصى به)`;
+            if(panelVoltageInput.value === "" || parseFloat(panelVoltageInput.value) === 0) {
+                panelVoltageInput.value = recommendedPanelVoltage;
+            }
+        }
+        
+        const recommendedPanelArea = (recommendedPanelPower <= 400) ? 1.8 : (recommendedPanelPower <= 550 ? 2.2 : 2.6);
+        if(panelAreaInput) {
+            panelAreaInput.placeholder = `${recommendedPanelArea} m² (موصى به)`;
+            if(panelAreaInput.value === "" || parseFloat(panelAreaInput.value) === 0) {
+                panelAreaInput.value = recommendedPanelArea;
+            }
+        }
+        
+        if(batteryCapacityInput) {
+            batteryCapacityInput.placeholder = `${battSpecs.capacity} Ah (موصى به)`;
+            if(batteryCapacityInput.value === "" || parseFloat(batteryCapacityInput.value) === 0) {
+                batteryCapacityInput.value = battSpecs.capacity;
+            }
+        }
+        
+        if(batteryVoltageInput) {
+            batteryVoltageInput.placeholder = `${battSpecs.voltage} V (موصى به)`;
+            if(batteryVoltageInput.value === "" || parseFloat(batteryVoltageInput.value) === 0) {
+                batteryVoltageInput.value = battSpecs.voltage;
+            }
+        }
+        
+        if(systemVoltageSelect) {
+            // Set a data attribute with recommended value for reference
+            systemVoltageSelect.setAttribute('data-recommended', recommendedSysVoltage);
+            if(systemVoltageSelect.value === "" || systemVoltageSelect.value === "auto") {
+                // Don't auto-select, just show placeholder option
+                const autoOption = systemVoltageSelect.querySelector('option[value="auto"]');
+                if(autoOption) autoOption.selected = true;
+            }
+        }
+        
+        // Don't modify componentSettings here - let the user decide when they click calculate
     }
 
     const deviceDatabase = [
@@ -916,5 +972,6 @@
         // end prevent back bnutton 
 </script>
 <script src="register-sw.js"></script>
+<script src="removecotextmenue.js"></script>
 </body>
 </html>
