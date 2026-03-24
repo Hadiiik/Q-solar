@@ -1,4 +1,7 @@
+const handleContextMenu = (e) => {
+      e.preventDefault();
+      return false;
+    };
 document.addEventListener('contextmenu', handleContextMenu);
-    if (typeof navigator.serviceWorker !== 'undefined') {
-    navigator.serviceWorker.register('sw.js')
-  }
+
+  
