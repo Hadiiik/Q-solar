@@ -1,12 +1,49 @@
 // service-worker.js
-const CACHE_NAME = 'offline-cache-v1';
+const CACHE_NAME = 'offline-cache-v2'; // تغيير الإصدار لتحديث الكاش القديم
 const urlsToCache = [
   '/',
   '/index.html',
   '/main.html',
   '/solar-designer.html',
-  "/splash.mp4" 
+  '/splash.mp4'
 ];
+
+// قائمة الدومينات الخارجية التي لا نريد تخزينها
+const EXTERNAL_DOMAINS = [
+  'trinasolar.com',
+  'aikosolar.com',
+  'googleapis.com',
+  'gstatic.com',
+  'cloudflare.com',
+  'fontawesome.com'
+];
+
+// التحقق مما إذا كان الطلب يجب تخزينه أم لا
+function shouldCache(request) {
+  const url = request.url;
+  const method = request.method;
+  
+  // لا تخزن طلبات POST أو PUT أو DELETE
+  if (method !== 'GET') return false;
+  
+  // لا تخزن طلبات API الخارجية
+  if (EXTERNAL_DOMAINS.some(domain => url.includes(domain))) return false;
+  
+  // لا تخزن طلبات API المحلية
+  if (url.includes('/api/')) return false;
+  
+  // لا تخزن الملفات التي تحتوي على استعلامات (query parameters) عشوائية
+  if (url.includes('?') && !url.includes('v=')) return false;
+  
+  return true;
+}
+
+// التحقق مما إذا كان الطلب للصفحات الرئيسية (HTML)
+function isNavigationRequest(request) {
+  return request.mode === 'navigate' || 
+         request.destination === 'document' ||
+         (request.url.endsWith('.html') && !request.url.includes('/api/'));
+}
 
 // تثبيت Service Worker وتحميل الملفات مسبقاً
 self.addEventListener('install', (event) => {
@@ -20,7 +57,7 @@ self.addEventListener('install', (event) => {
       })
       .then(() => {
         console.log('Service Worker: Installation complete');
-        return self.skipWaiting();
+        return self.skipWaiting(); // تفعيل Service Worker فوراً
       })
       .catch((error) => {
         console.error('Service Worker: Installation failed', error);
@@ -44,79 +81,141 @@ self.addEventListener('activate', (event) => {
       );
     }).then(() => {
       console.log('Service Worker: Activation complete');
-      return self.clients.claim();
+      return self.clients.claim(); // السيطرة على جميع الصفحات المفتوحة فوراً
     })
   );
 });
 
-// استراتيجية: Cache First with Network Fallback
+// استراتيجية جديدة: Network First للصفحات، Cache First للملفات الثابتة
 self.addEventListener('fetch', (event) => {
-  const requestUrl = new URL(event.request.url);
+  const request = event.request;
+  const requestUrl = new URL(request.url);
   
-  // استثناء طلبات API (إذا كان لديك)
+  // ==================== الاستثناءات ====================
+  // لا تتعامل مع طلبات الخارجية (نتركها للمتصفح)
+  if (EXTERNAL_DOMAINS.some(domain => requestUrl.hostname.includes(domain))) {
+    console.log('Service Worker: Skipping external domain', requestUrl.hostname);
+    return; // لا نتدخل في الطلبات الخارجية
+  }
+  
+  // طلبات API المحلية - استخدم Network First
   if (requestUrl.pathname.startsWith('/api/')) {
-    event.respondWith(networkFirst(event.request));
+    event.respondWith(networkFirst(request));
     return;
   }
   
-  // للصفحات والملفات الثابتة، استخدام استراتيجية Cache First
+  // ==================== الصفحات (HTML) ====================
+  // استراتيجية: Network First مع Cache Fallback
+  if (isNavigationRequest(request)) {
+    console.log('Service Worker: Navigation request (Network First)', request.url);
+    event.respondWith(
+      fetch(request)
+        .then((networkResponse) => {
+          // إذا نجح الطلب، قم بتخزين النسخة الجديدة في الخلفية
+          if (networkResponse && networkResponse.ok && shouldCache(request)) {
+            const responseClone = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(request, responseClone);
+              console.log('Service Worker: Updated cache for', request.url);
+            });
+          }
+          return networkResponse;
+        })
+        .catch(async (error) => {
+          // إذا فشلت الشبكة، استخدم الكاش
+          console.log('Service Worker: Network failed, trying cache for', request.url);
+          const cachedResponse = await caches.match(request);
+          
+          if (cachedResponse) {
+            console.log('Service Worker: Serving from cache', request.url);
+            return cachedResponse;
+          }
+          
+          // إذا لم يوجد في الكاش، اعرض صفحة الخطأ
+          console.error('Service Worker: No cache available', error);
+          return caches.match('/main.html') || new Response('Offline - Page not available', {
+            status: 503,
+            statusText: 'Service Unavailable',
+            headers: new Headers({
+              'Content-Type': 'text/html'
+            })
+          });
+        })
+    );
+    return;
+  }
+  
+  // ==================== الملفات الثابتة (CSS, JS, Images) ====================
+  // استراتيجية: Cache First مع تحديث الخلفية (Stale-While-Revalidate)
   event.respondWith(
-    caches.match(event.request)
-      .then((response) => {
-        // إذا وجد الملف في الكاش، أرسله
-        if (response) {
-          console.log('Service Worker: Serving from cache', event.request.url);
-          return response;
-        }
-        
-        // إذا لم يوجد، قم بتحميله من الشبكة
-        console.log('Service Worker: Fetching from network', event.request.url);
-        return fetch(event.request)
+    caches.match(request)
+      .then((cachedResponse) => {
+        // طلب الشبكة في الخلفية لتحديث الكاش
+        const fetchPromise = fetch(request)
           .then((networkResponse) => {
-            // تخزين الملف الجديد في الكاش للمرة القادمة
-              return caches.open(CACHE_NAME)
-              .then((cache) => {
-                // منع تخزين طلبات API الخارجية
-                if (event.request.method === 'GET' && 
-                    !event.request.url.includes('/api/') &&
-                    !event.request.url.includes('trinasolar.com') &&
-                    !event.request.url.includes('aikosolar.com')) {
-                  cache.put(event.request, networkResponse.clone());
-                }
-                return networkResponse;
+            if (networkResponse && networkResponse.ok && shouldCache(request)) {
+              const responseClone = networkResponse.clone();
+              caches.open(CACHE_NAME).then((cache) => {
+                cache.put(request, responseClone);
+                console.log('Service Worker: Background cache update for', request.url);
               });
+            }
+            return networkResponse;
           })
           .catch((error) => {
-            console.error('Service Worker: Fetch failed', error);
-            // في حالة عدم وجود اتصال بالإنترنت، نعرض صفحة الخطأ
-            if (event.request.mode === 'navigate') {
-              return caches.match('/main.html');
-            }
-            return new Response('Network error occurred', {
-              status: 408,
-              statusText: 'Network Error',
-              headers: new Headers({
-                'Content-Type': 'text/plain'
-              })
-            });
+            console.log('Service Worker: Background fetch failed for', request.url, error);
+            return null;
           });
+        
+        // إرجاع النسخة المخزنة فوراً (إذا وجدت)
+        if (cachedResponse) {
+          console.log('Service Worker: Serving from cache (with background update)', request.url);
+          return cachedResponse;
+        }
+        
+        // إذا لم توجد نسخة مخزنة، انتظر نتيجة الشبكة
+        console.log('Service Worker: No cache, fetching from network', request.url);
+        return fetchPromise;
       })
   );
 });
 
 // استراتيجية Network First للـ API
 async function networkFirst(request) {
+  const timeout = 10000; // 10 ثواني timeout
+  
   try {
-    const networkResponse = await fetch(request);
+    // محاولة الشبكة مع timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeout);
+    
+    const networkResponse = await fetch(request, {
+      signal: controller.signal
+    });
+    
+    clearTimeout(timeoutId);
     return networkResponse;
+    
   } catch (error) {
+    console.log('Service Worker: Network first failed for API', request.url, error);
+    
+    // محاولة الكاش
     const cachedResponse = await caches.match(request);
     if (cachedResponse) {
+      console.log('Service Worker: Serving API from cache', request.url);
       return cachedResponse;
     }
-    return new Response('Network error occurred', {
+    
+    // إذا فشل كل شيء
+    return new Response(JSON.stringify({
+      error: 'Network error',
+      message: 'Unable to reach the server'
+    }), {
       status: 408,
-      statusText: 'Network Error'
+      statusText: 'Network Error',
+      headers: new Headers({
+        'Content-Type': 'application/json'
+      })
     });
   }
 }
@@ -132,20 +231,42 @@ async function updateCache() {
   try {
     const cache = await caches.open(CACHE_NAME);
     const responses = await Promise.all(
-      urlsToCache.map(url => 
-        fetch(url).catch(error => {
+      urlsToCache.map(async (url) => {
+        try {
+          const response = await fetch(url, {
+            cache: 'no-cache',
+            headers: {
+              'Cache-Control': 'no-cache'
+            }
+          });
+          return { url, response };
+        } catch (error) {
           console.error(`Failed to fetch ${url}:`, error);
-          return null;
-        })
-      )
+          return { url, response: null };
+        }
+      })
     );
     
-    responses.forEach((response, index) => {
+    responses.forEach(({ url, response }) => {
       if (response && response.ok) {
-        cache.put(urlsToCache[index], response);
+        cache.put(url, response);
+        console.log(`Service Worker: Cache updated for ${url}`);
       }
     });
   } catch (error) {
     console.error('Service Worker: Cache update failed', error);
   }
 }
+
+// إرسال رسالة إلى الصفحة عند توفر تحديث
+self.addEventListener('message', (event) => {
+  if (event.data === 'skipWaiting') {
+    self.skipWaiting();
+  }
+});
+
+// التحقق من التحديثات في الخلفية كل ساعة
+setInterval(() => {
+  console.log('Service Worker: Checking for updates...');
+  updateCache();
+}, 60 * 60 * 1000); // كل ساعة
