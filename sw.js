@@ -4,7 +4,8 @@ const urlsToCache = [
   '/',
   '/index.html',
   '/main.html',
-  '/solar-designer.html', // صفحة بديلة في حالة عدم توفر الصفحة المطلوبة
+  '/solar-designer.html',
+  "/splash.mp4" // صفحة بديلة في حالة عدم توفر الصفحة المطلوبة
 ];
 
 // تثبيت Service Worker وتحميل الملفات مسبقاً
