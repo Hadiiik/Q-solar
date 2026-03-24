@@ -5,7 +5,7 @@
   "start_url": "/Q-solar",
   "display": "standalone",
   "background_color": "#DC8623",
-  "theme_color": "#2E438F",
+  "theme_color": "#DC8623",
   "icons": [
     {
       "src": "icon-192.png",
