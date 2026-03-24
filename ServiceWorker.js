@@ -18,6 +18,30 @@ const EXTERNAL_DOMAINS = [
   'fontawesome.com'
 ];
 
+// الملفات التي نريد استخدام Cache First لها (أولوية للكاش)
+const CACHE_FIRST_FILES = [
+  '/splash.mp4',
+  'splash.mp4',
+  '.mp4',
+  '.jpg',
+  '.png',
+  '.webp',
+  '.svg'
+];
+
+// التحقق مما إذا كان الملف يجب أن يكون Cache First
+function shouldUseCacheFirst(request) {
+  const url = request.url;
+  
+  // التحقق من splash.mp4 مباشرة
+  if (url.includes('splash.mp4')) {
+    return true;
+  }
+  
+  // التحقق من امتدادات الملفات
+  return CACHE_FIRST_FILES.some(ext => url.includes(ext));
+}
+
 // التحقق مما إذا كان الطلب يجب تخزينه أم لا
 function shouldCache(request) {
   const url = request.url;
@@ -32,8 +56,8 @@ function shouldCache(request) {
   // لا تخزن طلبات API المحلية
   if (url.includes('/api/')) return false;
   
-  // لا تخزن الملفات التي تحتوي على استعلامات (query parameters) عشوائية
-  if (url.includes('?') && !url.includes('v=')) return false;
+  // تخزين splash.mp4 دائماً
+  if (url.includes('splash.mp4')) return true;
   
   return true;
 }
@@ -86,7 +110,7 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// استراتيجية جديدة: Network First للصفحات، Cache First للملفات الثابتة
+// استراتيجية جديدة: Network First للصفحات، Cache First للملفات الثابتة و splash.mp4
 self.addEventListener('fetch', (event) => {
   const request = event.request;
   const requestUrl = new URL(request.url);
@@ -101,6 +125,45 @@ self.addEventListener('fetch', (event) => {
   // طلبات API المحلية - استخدم Network First
   if (requestUrl.pathname.startsWith('/api/')) {
     event.respondWith(networkFirst(request));
+    return;
+  }
+  
+  // ==================== splash.mp4 وملفات الوسائط ====================
+  // استراتيجية: Cache First (أولوية للكاش)
+  if (shouldUseCacheFirst(request)) {
+    console.log('Service Worker: Cache First for media file', request.url);
+    event.respondWith(
+      caches.match(request)
+        .then((cachedResponse) => {
+          if (cachedResponse) {
+            console.log('Service Worker: Serving splash.mp4 from cache', request.url);
+            return cachedResponse;
+          }
+          
+          // إذا لم يوجد في الكاش، حمله من الشبكة
+          console.log('Service Worker: Fetching splash.mp4 from network', request.url);
+          return fetch(request)
+            .then((networkResponse) => {
+              // تخزينه للاستخدام المستقبلي
+              if (networkResponse && networkResponse.ok) {
+                const responseClone = networkResponse.clone();
+                caches.open(CACHE_NAME).then((cache) => {
+                  cache.put(request, responseClone);
+                  console.log('Service Worker: Cached splash.mp4 for future use');
+                });
+              }
+              return networkResponse;
+            })
+            .catch((error) => {
+              console.error('Service Worker: Failed to fetch splash.mp4', error);
+              // في حالة الفشل، يمكن إرجاع placeholder أو nothing
+              return new Response('Video not available', {
+                status: 404,
+                statusText: 'Not Found'
+              });
+            });
+        })
+    );
     return;
   }
   
