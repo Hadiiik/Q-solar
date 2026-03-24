@@ -5,7 +5,7 @@ const urlsToCache = [
   '/index.html',
   '/main.html',
   '/solar-designer.html',
-  "/splash.mp4" // صفحة بديلة في حالة عدم توفر الصفحة المطلوبة
+  "/splash.mp4" 
 ];
 
 // تثبيت Service Worker وتحميل الملفات مسبقاً
@@ -74,11 +74,13 @@ self.addEventListener('fetch', (event) => {
         return fetch(event.request)
           .then((networkResponse) => {
             // تخزين الملف الجديد في الكاش للمرة القادمة
-            return caches.open(CACHE_NAME)
+              return caches.open(CACHE_NAME)
               .then((cache) => {
-                // لا نخزن استجابات API أو الملفات غير الثابتة
+                // منع تخزين طلبات API الخارجية
                 if (event.request.method === 'GET' && 
-                    !event.request.url.includes('/api/')) {
+                    !event.request.url.includes('/api/') &&
+                    !event.request.url.includes('trinasolar.com') &&
+                    !event.request.url.includes('aikosolar.com')) {
                   cache.put(event.request, networkResponse.clone());
                 }
                 return networkResponse;
