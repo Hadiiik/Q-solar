@@ -552,9 +552,10 @@
                 queryTime: "وقت الاستعلام",
                 serialNo: "الرقم التسلسلي",
                 calculatorMsg: "اداة المصمم الشمسي ",
-                guideMsg: "📘 دليل الطاقة الشمسية: نصائح حول تركيب الألواح وصيانتها ومطابقة المحولات",
+                cablesizerMsg:"حساب مقطع الكابل",
+                guideMsg: " دليل الاعطال ",
                 deviceSelectTitle: "اختر جهازاً للتحقق",
-                statusFailed: "❌ غير معتمد",
+                statusFailed: " غير معتمد",
                 statusSuccess: "✓ معتمد",
                 pasteHint: "يمكنك لصق الرقم التسلسلي (SN / Lot ID) من الحافظة",
                 pmax: "الاستطاعة القصوى (W)",
@@ -593,9 +594,10 @@
                 queryTime: "Query Time",
                 serialNo: "Serial No.",
                 calculatorMsg: "Solar Fit tool",
-                guideMsg: "📘 Solar Guide: Installation tips, inverter matching & maintenance",
+                cablesizerMsg:"cable sizer calculater",
+                guideMsg: " Error Guide",
                 deviceSelectTitle: "Select a device to verify",
-                statusFailed: "❌ Not Certified",
+                statusFailed: " Not Certified",
                 statusSuccess: "✓ Certified",
                 pasteHint: "You can paste the serial number (SN / Lot ID) from clipboard",
                 pmax: "Max Power (W)",
@@ -1006,9 +1008,15 @@
                 viewContainer.innerHTML = `
                  <a href="solar-designer.html" class="btn-primary" style="display: flex; padding: 14px 32px; text-decoration: none; color:unset; ">
                 <div class="calculator-placeholder"><i class="fas fa-calculator" style="font-size: 48px; color: var(--primary); margin-bottom: 16px; display: block;"></i><p style="font-size:16px">${t("calculatorMsg")}</p>
-                    </div></a>`;
+                    </div></a>
+                    <a href="cable-sizer.html" class="btn-primary" style="display: flex; padding: 14px 32px; text-decoration: none; color:unset; ">
+                <div class="calculator-placeholder"><i class="fas fa-network-wired" style="font-size: 48px; color: var(--primary); margin-bottom: 16px; display: block;"></i><p style="font-size:16px">${t("cablesizerMsg")}</p>
+                    </div></a>
+                    `;
             } else if(activeTab === "guide") {
-                viewContainer.innerHTML = `<div class="guide-placeholder"><i class="fas fa-leaf" style="font-size: 48px; color: var(--primary); margin-bottom: 16px;"></i><p>${t("guideMsg")}</p><p style="margin-top:12px; font-size:0.85rem;">🔋 Trina Solar | AIKO | Longi references</p></div>`;
+                viewContainer.innerHTML = `<a href="error-guide.html" class="btn-primary" style="display: flex; padding: 14px 32px; text-decoration: none; color:unset; ">
+                <div class="calculator-placeholder"><i class="fas fa-network-wired" style="font-size: 48px; color: var(--primary); margin-bottom: 16px; display: block;"></i><p style="font-size:16px">${t("guideMsg")}</p>
+                    </div></a>`;
             } else if(activeTab === "history") {
                 renderHistoryView(viewContainer);
             }

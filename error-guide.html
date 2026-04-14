@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <title>QSolar | دليل الأعطال</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #DC8623;
+            --primary-dark: #b56c1c;
+            --secondary: #2E438F;
+            --secondary-dark: #1f2f63;
+            --bg-dark: #0B1120;
+            --surface: #111827;
+            --surface-light: #1F2937;
+            --text-primary: #F3F4F6;
+            --text-secondary: #9CA3AF;
+            --success: #10B981;
+            --danger: #EF4444;
+            --warning: #F59E0B;
+            --info: #3B82F6;
+            --border: #2D3A4F;
+            --transition: all 0.2s ease;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+            direction: rtl;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            background: var(--surface);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+            overflow-x: hidden;
+        }
+
+        .header {
+            background: var(--primary);
+            padding: 18px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom-left-radius: 24px;
+            border-bottom-right-radius: 24px;
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.3);
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background-image: url('1774361357592.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+        }
+
+        .logo-area h1 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            color: white;
+        }
+
+        .back-home-btn {
+            background: var(--secondary);
+            border: none;
+            width: 42px;
+            height: 42px;
+            border-radius: 30px;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .back-home-btn:active {
+            transform: scale(0.96);
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 20px 18px;
+            overflow-y: auto;
+            padding-bottom: 30px;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--primary);
+        }
+
+        .page-title i {
+            font-size: 1.6rem;
+        }
+
+        .search-section {
+            background: var(--surface-light);
+            border-radius: 28px;
+            padding: 20px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border);
+        }
+
+        .section-label {
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-secondary);
+        }
+
+        /* Custom Select */
+        .custom-select {
+            position: relative;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .select-selected {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 48px;
+            padding: 14px 18px;
+            color: var(--text-primary);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .select-selected i {
+            color: var(--primary);
+        }
+
+        .select-items {
+            position: absolute;
+            background: var(--surface);
+            top: 100%;
+            left: 0;
+            right: 0;
+            z-index: 99;
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            margin-top: 8px;
+            max-height: 250px;
+            overflow-y: auto;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+            display: none;
+        }
+
+        .select-items.show {
+            display: block;
+        }
+
+        .select-item {
+            padding: 14px 18px;
+            cursor: pointer;
+            border-bottom: 1px solid var(--border);
+            transition: background 0.2s;
+            color: var(--text-primary);
+        }
+
+        .select-item:last-child {
+            border-bottom: none;
+        }
+
+        .select-item:hover,
+        .select-item.selected-active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .or-divider {
+            text-align: center;
+            margin: 16px 0;
+            position: relative;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .or-divider::before,
+        .or-divider::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            width: 40%;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .or-divider::before {
+            left: 0;
+        }
+
+        .or-divider::after {
+            right: 0;
+        }
+
+        .search-wrapper {
+            position: relative;
+        }
+
+        .error-input-group {
+            background: var(--surface);
+            border-radius: 48px;
+            padding: 4px 18px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border: 1px solid var(--border);
+            margin-bottom: 16px;
+        }
+
+        .error-input-group i {
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+
+        .error-input-group input {
+            background: transparent;
+            border: none;
+            padding: 14px 0;
+            flex: 1;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+            font-family: inherit;
+        }
+
+        .suggestions-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            margin-top: -8px;
+            margin-bottom: 16px;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .suggestion-item {
+            padding: 12px 18px;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            color: var(--text-primary);
+        }
+
+        .suggestion-item:last-child {
+            border-bottom: none;
+        }
+
+        .suggestion-item:hover,
+        .suggestion-item.active-suggestion {
+            background: var(--primary);
+            color: white;
+        }
+
+        .search-btn {
+            border: none;
+            width: 100%;
+            padding: 14px;
+            border-radius: 48px;
+            font-weight: bold;
+            font-size: 1rem;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: 0.2s;
+            background: var(--primary);
+        }
+
+        .search-btn:active {
+            transform: scale(0.98);
+            opacity: 0.9;
+        }
+
+        .results-area {
+            margin-top: 20px;
+        }
+
+        /* حاوية قابلة للسكرول لنتائج البحث */
+        .results-scroll-container {
+            max-height: 500px;
+            overflow-y: auto;
+            padding-right: 4px;
+            border-radius: 20px;
+        }
+
+        .result-card {
+            background: var(--surface-light);
+            border-radius: 24px;
+            padding: 18px;
+            margin-bottom: 16px;
+            border-right: 5px solid var(--warning);
+            animation: fadeSlide 0.3s ease-out;
+            transition: transform 0.2s;
+        }
+
+        .result-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .result-header {
+            display: flex;
+            align-items: baseline;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .error-code {
+            font-family: monospace;
+            font-size: 1.4rem;
+            font-weight: 800;
+            background: var(--primary-dark);
+            padding: 4px 14px;
+            border-radius: 40px;
+            color: white;
+            letter-spacing: 1px;
+        }
+
+        .brand-badge {
+            background: var(--secondary);
+            padding: 4px 12px;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .error-description {
+            font-size: 1rem;
+            margin-bottom: 16px;
+            padding: 8px 0;
+            color: var(--text-primary);
+            line-height: 1.4;
+        }
+
+        .solution-box {
+            background: rgba(16, 185, 129, 0.1);
+            border-right: 3px solid var(--success);
+            padding: 12px 16px;
+            border-radius: 16px;
+            margin: 12px 0;
+        }
+
+        .solution-box i {
+            color: var(--success);
+            margin-left: 8px;
+        }
+
+        .tip-box {
+            background: rgba(59, 130, 246, 0.1);
+            border-right: 3px solid var(--info);
+            padding: 12px 16px;
+            border-radius: 16px;
+            margin-top: 12px;
+            font-size: 0.9rem;
+        }
+
+        .tip-box i {
+            color: var(--info);
+            margin-left: 8px;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px 20px;
+            background: var(--surface-light);
+            border-radius: 32px;
+            color: var(--text-secondary);
+        }
+
+        .section-divider {
+            margin: 24px 0 12px;
+            font-weight: 600;
+            color: var(--primary);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+        }
+
+        @keyframes fadeSlide {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .footer-note {
+            text-align: center;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            margin-top: 24px;
+            padding: 12px;
+            border-top: 1px solid var(--border);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-container">
+        <div class="header">
+            <div class="logo-area">
+                <div class="logo-icon"></div>
+                <h1>دليل الأعطال</h1>
+            </div>
+            <button class="back-home-btn" id="backHomeBtn"><i class="fas fa-home"></i></button>
+        </div>
+        <div class="main-content" id="mainContent">
+            <div class="page-title">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>مرجع رموز الأعطال</span>
+            </div>
+
+            <div class="search-section">
+                <div class="section-label">
+                    <i class="fas fa-industry"></i>
+                    <span>اختر الماركة</span>
+                </div>
+                <!-- Custom Select -->
+                <div class="custom-select" id="brandCustomSelect">
+                    <div class="select-selected" id="selectSelected">
+                        <span id="selectedBrandText">جميع الماركات</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="select-items" id="selectItems">
+                        <div class="select-item" data-value="all">جميع الماركات</div>
+                        <div class="select-item" data-value="deye">Deye (انفرترات هجين / ربط شبكي)</div>
+                    </div>
+                </div>
+
+                <div class="or-divider">
+                    <span>أو</span>
+                </div>
+
+                <div class="section-label">
+                    <i class="fas fa-code"></i>
+                    <span>أدخل رمز الخطأ</span>
+                </div>
+                <div class="search-wrapper">
+                    <div class="error-input-group">
+                        <i class="fas fa-barcode"></i>
+                        <input type="text" id="errorCodeInput" placeholder="مثال: F07 , F64 , F58" autocomplete="off">
+                    </div>
+                    <div class="suggestions-box" id="suggestionsBox"></div>
+                </div>
+                <button class="search-btn" id="searchBtn">
+                    <i class="fas fa-search"></i>
+                    <span>بحث</span>
+                </button>
+            </div>
+
+            <div class="results-area" id="resultsArea">
+                <div class="no-results" id="initialMessage">
+                    <i class="fas fa-lightbulb" style="font-size: 2rem; margin-bottom: 12px; display: block;"></i>
+                    <p>اختر ماركة أو اكتب رمز خطأ للبحث عن الحل المناسب</p>
+                    <p style="font-size: 0.8rem; margin-top: 8px;">مثال: F07 (جهد الشبكة خارج النطاق)</p>
+                </div>
+            </div>
+            <div class="footer-note">
+                <i class="fas fa-database"></i> قاعدة بيانات محدثة | Deye | اعطال شائعة وحلول
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            // ===================== قاعدة بيانات الأعطال =====================
+            const errorDatabase = {
+                deye: [
+                    { code: "F01", description: "عكس قطبية الإدخال DC", solution: "التأكد من قطبية توصيل الألواح الشمسية (+ و -).", tip: "استخدم مقياس الفولتميتر للتأكد من القطبية." },
+                    { code: "F02", description: "خطأ دائم في مقاومة العزل DC", solution: "فحص كابل التأريض للانفرتر.", tip: "افحص الألواح: قد يكون هناك تسرب تيار." },
+                    { code: "F03", description: "خطأ تيار التسرب DC", solution: "فحص مصدر الطاقة DC والألواح. إعادة التشغيل.", tip: "إذا تكرر، افصل الألواح وأعد توصيلها." },
+                    { code: "F04", description: "خطأ التأريض GFDI", solution: "فحص توصيلات خرج الألواح والتأكد من عدم وجود تماس.", tip: "افحص صناديق التوصيل." },
+                    { code: "F05", description: "خطأ في قراءة الذاكرة", solution: "إعادة تشغيل الانفرتر.", tip: "قد يكون عارضاً." },
+                    { code: "F06", description: "خطأ في كتابة الذاكرة", solution: "إعادة تشغيل الانفرتر. تحديث البرنامج الثابت.", tip: "تأكد من الإصدار." },
+                    { code: "F07", description: "منصهر GFDI محترق", solution: "فحص منصهر GFDI واستبداله.", tip: "يحدث في أنظمة الفاز المنقسمة." },
+                    { code: "F08", description: "فشل مرحل GFDI / فشل التأريض", solution: "توصيل خط N بالأرضي.", tip: "تأكد من توصيل نقطة التعادل." },
+                    { code: "F09", description: "IGBT تالف", solution: "يتطلب استبدال لوحة الطاقة.", tip: "تواصل مع الوكيل." },
+                    { code: "F10", description: "فشل مصدر الطاقة المساعد", solution: "إعادة تشغيل الانفرتر.", tip: "افصل جميع الأحمال." },
+                    { code: "F11", description: "أخطاء في موصل التيار الرئيسي AC", solution: "إعادة تشغيل النظام.", tip: "افصل الطاقة لمدة 3 دقائق." },
+                    { code: "F12", description: "أخطاء في موصل التيار المساعد AC", solution: "إعادة تشغيل الانفرتر.", tip: "افحص توصيلات مرحل AC." },
+                    { code: "F13", description: "تغيير وضع العمل / الشبكة", solution: "يختفي تلقائياً. إعادة التشغيل إذا استمر.", tip: "إشعار وليس عطلاً." },
+                    { code: "F14", description: "تيار زائد DC برمجي", solution: "افصل مفاتيح DC/AC لمدة 3 دقائق.", tip: "تأكد من قدرة الألواح." },
+                    { code: "F15", description: "تيار زائد AC برمجي", solution: "إعادة تشغيل الانفرتر.", tip: "افصل الحمل الزائد." },
+                    { code: "F16", description: "خطأ تيار التسرب GFCI", solution: "فحص توصيلات الألواح وإعادة التشغيل.", tip: "افحص كابلات AC." },
+                    { code: "F18", description: "تيار زائد AC في العتاد", solution: "التحقق من قدرة الحمل.", tip: "قلل الأحمال." },
+                    { code: "F20", description: "تيار زائد DC في العتاد", solution: "فحص توصيلات الألواح والبطارية.", tip: "افحص تيار الدائرة القصيرة." },
+                    { code: "F23", description: "تيار التسرب AC عابر", solution: "فحص توصيلات التأريض. إعادة التشغيل.", tip: "قد يكون بسبب الرطوبة." },
+                    { code: "F24", description: "فشل مقاومة العزل DC", solution: "فحص توصيلات الألواح والتأريض.", tip: "اختبر مقاومة العزل." },
+                    { code: "F26", description: "عدم توازن ناقل DC", solution: "فحص فرق الحمل بين L1 و L2.", tip: "وازن الأحمال." },
+                    { code: "F29", description: "فشل CANBus في التشغيل المتوازي", solution: "فحص كابل الاتصالات وإعدادات العنوان.", tip: "تأكد من تطابق الإصدارات." },
+                    { code: "F30", description: "فشل موصل التيار الرئيسي AC", solution: "إعادة التشغيل. فحص المرحلات.", tip: "افحص ملفات المرحلات." },
+                    { code: "F34", description: "حمل زائد AC / تيار زائد", solution: "فحص حمل الاحتياطي المتصل.", tip: "قلل الأحمال." },
+                    { code: "F35", description: "لا يوجد شبكة AC", solution: "التأكد من توفر الشبكة وتوصيلاتها.", tip: "تأكد من قاطع الشبكة." },
+                    { code: "F41", description: "توقف النظام المتوازي", solution: "تشغيل جميع الانفرترات.", tip: "تأكد من الوضع المتوازي." },
+                    { code: "F42", description: "جهد خط AC منخفض", solution: "فحص جهد AC ضمن المواصفات.", tip: "انتظر استقرار الشبكة." },
+                    { code: "F46", description: "خطأ في بطارية الاحتياط", solution: "فحص حالة كل بطارية.", tip: "تأكد من توافق BMS." },
+                    { code: "F47", description: "تردد AC مرتفع", solution: "فحص تردد الشبكة.", tip: "قد يكون المولد غير مستقر." },
+                    { code: "F48", description: "تردد AC منخفض", solution: "فحص تردد الشبكة.", tip: "استخدم مصدر مستقر." },
+                    { code: "F52", description: "جهد ناقل DC مرتفع", solution: "فحص جهد البطارية والإدخال PV.", tip: "قلل عدد الألواح." },
+                    { code: "F53", description: "جهد ناقل DC منخفض", solution: "فحص البطارية.", tip: "شحن البطارية." },
+                    { code: "F56", description: "جهد ناقل DC منخفض جداً", solution: "فحص جهد البطارية وشحنها.", tip: "قد تحتاج لشحن خارجي." },
+                    { code: "F58", description: "فشل اتصال BMS", solution: "انقطاع الاتصال بين الانفرتر و BMS.", tip: "افحص كابل RS485/CAN." },
+                    { code: "F63", description: "خطأ ARC", solution: "فحص توصيلات كابلات الألواح.", tip: "قد يكون هناك قوس كهربائي." },
+                    { code: "F64", description: "ارتفاع درجة حرارة المشتت الحراري", solution: "إيقاف التشغيل لمدة 10 دقائق.", tip: "نظف المراوح وفتحات التهوية." }
+                ]
+            };
+
+            // DOM Elements
+            const brandSelectNative = document.getElementById('brandSelect'); // hidden, kept for compatibility? no we use custom
+            const customSelect = document.getElementById('brandCustomSelect');
+            const selectSelected = document.getElementById('selectSelected');
+            const selectItemsDiv = document.getElementById('selectItems');
+            const selectedBrandText = document.getElementById('selectedBrandText');
+            const errorInput = document.getElementById('errorCodeInput');
+            const searchBtn = document.getElementById('searchBtn');
+            const resultsArea = document.getElementById('resultsArea');
+            const suggestionsBox = document.getElementById('suggestionsBox');
+            const backHomeBtn = document.getElementById('backHomeBtn');
+
+            let currentBrand = 'all'; // 'all' or 'deye'
+            let allErrors = errorDatabase.deye; // flat array for search
+
+            // --- Custom Select Logic ---
+            function toggleSelectDropdown(show) {
+                if (show) selectItemsDiv.classList.add('show');
+                else selectItemsDiv.classList.remove('show');
+            }
+
+            selectSelected.addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggleSelectDropdown(!selectItemsDiv.classList.contains('show'));
+            });
+
+            document.querySelectorAll('.select-item').forEach(item => {
+                item.addEventListener('click', function (e) {
+                    const value = this.dataset.value;
+                    currentBrand = value;
+                    let displayText = value === 'all' ? 'جميع الماركات' : 'Deye (انفرترات هجين / ربط شبكي)';
+                    selectedBrandText.textContent = displayText;
+
+                    // Update active class
+                    document.querySelectorAll('.select-item').forEach(el => el.classList.remove('selected-active'));
+                    this.classList.add('selected-active');
+
+                    toggleSelectDropdown(false);
+
+                    // Clear results and suggestions
+                    resultsArea.innerHTML = `<div class="no-results"><i class="fas fa-search" style="font-size: 2rem; margin-bottom: 12px; display: block;"></i><p>اختر ماركة أو اكتب رمز خطأ للبحث</p></div>`;
+                    suggestionsBox.style.display = 'none';
+                    errorInput.value = '';
+                });
+            });
+
+            window.addEventListener('click', () => toggleSelectDropdown(false));
+
+            // --- Search & Suggestions ---
+            function getFilteredSuggestions(query) {
+                if (!query) return [];
+                const upperQuery = query.toUpperCase();
+                const source = currentBrand === 'all' ? allErrors : errorDatabase[currentBrand] || [];
+                return source.filter(err => err.code.includes(upperQuery)).map(err => err.code);
+            }
+
+            function showSuggestions(suggestions) {
+                if (suggestions.length === 0) {
+                    suggestionsBox.style.display = 'none';
+                    return;
+                }
+                let html = '';
+                suggestions.forEach(code => {
+                    html += `<div class="suggestion-item" data-code="${code}">${code}</div>`;
+                });
+                suggestionsBox.innerHTML = html;
+                suggestionsBox.style.display = 'block';
+
+                document.querySelectorAll('.suggestion-item').forEach(el => {
+                    el.addEventListener('click', function () {
+                        errorInput.value = this.dataset.code;
+                        suggestionsBox.style.display = 'none';
+                        performSearch();
+                    });
+                });
+            }
+
+            errorInput.addEventListener('input', (e) => {
+                const val = e.target.value.trim();
+                const suggestions = getFilteredSuggestions(val);
+                showSuggestions(suggestions);
+            });
+
+            errorInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    suggestionsBox.style.display = 'none';
+                    performSearch();
+                }
+            });
+
+            // Close suggestions on outside click
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.search-wrapper')) {
+                    suggestionsBox.style.display = 'none';
+                }
+            });
+
+            // --- Search Logic ---
+            function performSearch() {
+                const query = errorInput.value.trim().toUpperCase();
+                const brand = currentBrand;
+
+                let source = [];
+                if (brand === 'all') source = allErrors;
+                else if (brand === 'deye') source = errorDatabase.deye;
+
+                if (!query) {
+                    resultsArea.innerHTML = `<div class="no-results"><i class="fas fa-info-circle" style="font-size: 2rem; margin-bottom: 12px; display: block;"></i><p>أدخل رمز خطأ للبحث</p></div>`;
+                    return;
+                }
+
+                // Exact matches
+                const exactMatches = source.filter(err => err.code === query);
+                // Similar matches (includes query but not exact)
+                const similarMatches = source.filter(err => err.code.includes(query) && err.code !== query);
+
+                let html = '';
+                if (exactMatches.length > 0 || similarMatches.length > 0) {
+                    html += `<div class="results-scroll-container">`;
+
+                    if (exactMatches.length > 0) {
+                        html += `<div class="section-divider"><i class="fas fa-check-circle"></i> نتائج مطابقة</div>`;
+                        exactMatches.forEach(err => html += generateCardHTML(err));
+                    }
+
+                    if (similarMatches.length > 0) {
+                        html += `<div class="section-divider"><i class="fas fa-search"></i> نتائج مشابهة</div>`;
+                        similarMatches.forEach(err => html += generateCardHTML(err));
+                    }
+
+                    html += `</div>`;
+                    resultsArea.innerHTML = html;
+                } else {
+                    resultsArea.innerHTML = `<div class="no-results"><i class="fas fa-exclamation-circle" style="font-size: 2rem; margin-bottom: 12px;"></i><p>لا توجد نتائج للرمز "${query}"</p></div>`;
+                }
+                suggestionsBox.style.display = 'none';
+            }
+
+            function generateCardHTML(err) {
+                return `
+                <div class="result-card">
+                    <div class="result-header">
+                        <span class="error-code">${err.code}</span>
+                        <span class="brand-badge"><i class="fas fa-solar-panel"></i> Deye</span>
+                    </div>
+                    <div class="error-description">
+                        <i class="fas fa-exclamation-circle" style="color: var(--warning); margin-left: 6px;"></i>${err.description}
+                    </div>
+                    <div class="solution-box">
+                        <i class="fas fa-tools"></i> <strong>الحل المقترح:</strong><br>
+                        ${err.solution}
+                    </div>
+                    ${err.tip ? `
+                    <div class="tip-box">
+                        <i class="fas fa-lightbulb"></i> <strong>نصيحة:</strong> ${err.tip}
+                    </div>
+                    ` : ''}
+                </div>
+            `;
+            }
+
+            searchBtn.addEventListener('click', performSearch);
+
+            backHomeBtn.addEventListener('click', () => {
+                window.location.href = 'index.html';
+            });
+
+            // Init: set default selected
+            document.querySelector('.select-item[data-value="all"]').classList.add('selected-active');
+            selectedBrandText.textContent = 'جميع الماركات';
+            currentBrand = 'all';
+
+            // Prevent context menu
+            document.addEventListener('contextmenu', e => e.preventDefault());
+
+        })();
+    </script>
+</body>
+
+</html>

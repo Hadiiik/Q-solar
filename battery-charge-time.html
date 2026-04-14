@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <title>QSolar | حاسبة وقت شحن البطارية</title>
+    <link rel="icon" type="image/x-icon" href="1774361357592.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #DC8623;
+            --primary-dark: #b56c1c;
+            --primary-light: #f0a450;
+            --secondary: #2E438F;
+            --secondary-dark: #1f2f63;
+            --bg-dark: #0B1120;
+            --surface: #111827;
+            --surface-light: #1F2937;
+            --surface-lighter: #2D3A4F;
+            --text-primary: #F3F4F6;
+            --text-secondary: #9CA3AF;
+            --success: #10B981;
+            --danger: #EF4444;
+            --warning: #F59E0B;
+            --info: #3B82F6;
+            --border: #2D3A4F;
+            --transition: all 0.25s cubic-bezier(0.2, 0, 0, 1);
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            direction: rtl;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            background: var(--surface);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .header {
+            background: var(--primary);
+            padding: 18px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom-left-radius: 24px;
+            border-bottom-right-radius: 24px;
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.3);
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .back-button {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 30px;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .back-button:active {
+            transform: scale(0.95);
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background-image: url('1774361357592.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+        }
+
+        .logo-area h1 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 20px 18px;
+            overflow-y: auto;
+            padding-bottom: 80px;
+        }
+
+        .tool-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--primary);
+        }
+
+        .tool-title i {
+            font-size: 2rem;
+            color: var(--primary);
+        }
+
+        .tool-title h2 {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .steps-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: var(--surface-light);
+            display: flex;
+            justify-content: space-around;
+            border-top: 1px solid var(--border);
+            padding: 8px 12px 12px;
+            z-index: 20;
+            border-radius: 28px 28px 0 0;
+        }
+
+        .step {
+            flex: 1;
+            text-align: center;
+            padding: 8px 4px;
+            border-radius: 32px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .step.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .step.completed {
+            color: var(--success);
+        }
+
+        .step i {
+            display: block;
+            font-size: 1rem;
+            margin-bottom: 4px;
+        }
+
+        .card {
+            background: var(--surface-light);
+            border-radius: 24px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .card-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--primary);
+        }
+
+        .field {
+            margin-bottom: 16px;
+        }
+
+        .field label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+        }
+
+        .field label i {
+            color: var(--primary);
+            width: 20px;
+        }
+
+        .input-field {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 14px 16px;
+            width: 100%;
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-family: inherit;
+            transition: var(--transition);
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(220, 134, 35, 0.15);
+        }
+
+        .input-field[readonly] {
+            background: var(--surface-lighter);
+            opacity: 0.7;
+            cursor: default;
+        }
+
+        .row-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .info-badge {
+            display: inline-block;
+            background: var(--secondary);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            color: white;
+            margin-right: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            border: none;
+            width: 100%;
+            padding: 14px;
+            border-radius: 48px;
+            font-weight: bold;
+            font-size: 1rem;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 16px;
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: var(--surface-lighter);
+            border: 1px solid var(--border);
+            width: 100%;
+            padding: 12px;
+            border-radius: 48px;
+            font-weight: 500;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 12px;
+        }
+
+        .result-card {
+            background: linear-gradient(135deg, var(--surface-light), var(--surface));
+            border-radius: 24px;
+            padding: 20px;
+            margin-top: 20px;
+            border-right: 4px solid var(--success);
+            animation: fadeSlide 0.4s ease-out;
+        }
+
+        @keyframes fadeSlide {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .result-title i {
+            color: var(--success);
+        }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px dashed var(--border);
+        }
+
+        .result-row:last-child {
+            border-bottom: none;
+        }
+
+        .result-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .result-value {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .result-value.highlight {
+            color: var(--primary);
+            font-size: 1.4rem;
+            font-weight: 700;
+        }
+
+        .warning-card {
+            background: rgba(245, 158, 11, 0.08);
+            border-right: 4px solid var(--warning);
+            padding: 14px;
+            border-radius: 12px;
+            margin-top: 16px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .warning-card i {
+            color: var(--warning);
+            font-size: 1.1rem;
+            margin-top: 2px;
+        }
+
+        .info-note {
+            background: rgba(46, 67, 143, 0.15);
+            border-radius: 12px;
+            padding: 14px;
+            margin-top: 20px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .slider-container {
+            margin-top: 8px;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            background: var(--surface-lighter);
+            border-radius: 5px;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--primary);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 90px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--surface-light);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 60px;
+            font-size: 0.85rem;
+            z-index: 200;
+            max-width: 85%;
+            text-align: center;
+            animation: toastSlide 0.3s ease-out;
+            border: 1px solid var(--border);
+        }
+
+        @keyframes toastSlide {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .formula-badge {
+            background: var(--surface-lighter);
+            padding: 8px 12px;
+            border-radius: 12px;
+            font-family: monospace;
+            font-size: 0.8rem;
+            margin-top: 12px;
+            color: var(--info);
+        }
+
+        .error-text {
+            color: var(--danger);
+            font-size: 0.75rem;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-container">
+        <div class="header">
+            <div class="logo-area">
+                <button class="back-button" id="backBtn">
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+                <div class="logo-icon"></div>
+                <h1>QSolar</h1>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="tool-title">
+                <i class="fas fa-battery-charging"></i>
+                <h2>حاسبة وقت شحن البطارية</h2>
+            </div>
+
+            <div id="dynamicView"></div>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            // حالة التطبيق
+            let currentStep = 1;
+            let calculationResult = null;
+
+            // القيم الافتراضية (فارغة للبيانات الأساسية)
+            const defaults = {
+                batteryVoltage: null,
+                batteryCapacityAh: null,
+                currentChargePercent: null,
+                targetChargePercent: 90,
+                bmsMaxCurrent: 100,
+                inverterMaxCurrent: 80,
+                inverterMaxPower: 5000,
+                chargeEfficiency: 90,
+                slowdownFactor: 10
+            };
+
+            // تخزين القيم الحالية
+            let inputs = { ...defaults };
+
+            // تحديث القيم المترابطة في النافذة الثانية
+            function updateLinkedFieldsInStep2() {
+                const V = inputs.batteryVoltage || 48;
+                const invPower = inputs.inverterMaxPower || 5000;
+
+                // حساب أقصى تيار من القدرة
+                const maxCurrentFromPower = invPower / V;
+
+                // تحديث حقل العرض
+                const maxCurrentDisplay = document.getElementById('maxCurrentFromPowerDisplay');
+                if (maxCurrentDisplay) {
+                    maxCurrentDisplay.innerHTML = `<i class="fas fa-info-circle"></i> أقصى تيار متاح من القدرة: <strong>${maxCurrentFromPower.toFixed(1)} A</strong>`;
+                }
+
+                // حساب أقصى تيار نظري
+                const bmsMax = inputs.bmsMaxCurrent || 100;
+                const invMax = inputs.inverterMaxCurrent || 80;
+                const theoreticalMax = Math.min(bmsMax, invMax, maxCurrentFromPower);
+
+                const theoreticalDisplay = document.getElementById('theoreticalMaxDisplay');
+                if (theoreticalDisplay) {
+                    theoreticalDisplay.innerHTML = `<i class="fas fa-gauge-high"></i> أقصى تيار نظري: <strong>${theoreticalMax.toFixed(1)} A</strong>`;
+                }
+            }
+
+            // تحديث القيم المترابطة في النافذة الأولى
+            function updateLinkedFieldsInStep1() {
+                const V = parseFloat(document.getElementById('batteryVoltage')?.value) || 0;
+                const Ah = parseFloat(document.getElementById('batteryCapacityAh')?.value) || 0;
+
+                if (V > 0 && Ah > 0) {
+                    const capacityKwh = (Ah * V) / 1000;
+                    const kwhDisplay = document.getElementById('capacityKwhDisplay');
+                    if (kwhDisplay) {
+                        kwhDisplay.innerHTML = `<i class="fas fa-calculator"></i> السعة التقديرية: <strong>${capacityKwh.toFixed(2)} kWh</strong>`;
+                    }
+                }
+
+                // تحديث الشحن الحالي بـ Ah من النسبة المئوية
+                const percent = parseFloat(document.getElementById('currentChargePercent')?.value) || 0;
+                if (Ah > 0) {
+                    const currentAh = (Ah * percent) / 100;
+                    const ahDisplay = document.getElementById('currentChargeAhDisplay');
+                    if (ahDisplay) {
+                        ahDisplay.innerHTML = `<i class="fas fa-info-circle"></i> الشحن الحالي: ${currentAh.toFixed(1)} Ah`;
+                    }
+                }
+            }
+
+            // التحقق من صحة البيانات الأساسية
+            function validateBasicInputs() {
+                const V = inputs.batteryVoltage;
+                const Ah = inputs.batteryCapacityAh;
+                const currentPercent = inputs.currentChargePercent;
+                const targetPercent = inputs.targetChargePercent;
+
+                if (!V || V <= 0) {
+                    showToast('الرجاء إدخال فولتية البطارية');
+                    return false;
+                }
+                if (!Ah || Ah <= 0) {
+                    showToast('الرجاء إدخال سعة البطارية');
+                    return false;
+                }
+                if (currentPercent === null || currentPercent === undefined || currentPercent < 0 || currentPercent > 100) {
+                    showToast('الرجاء إدخال نسبة الشحن الحالية (0-100%)');
+                    return false;
+                }
+                if (currentPercent >= targetPercent) {
+                    showToast('نسبة الشحن الحالية يجب أن تكون أقل من النسبة المطلوبة');
+                    return false;
+                }
+
+                return true;
+            }
+
+            // حساب وقت الشحن
+            function calculateChargingTime() {
+                const V = inputs.batteryVoltage;
+                const totalAh = inputs.batteryCapacityAh;
+                const currentPercent = inputs.currentChargePercent;
+                const targetPercent = inputs.targetChargePercent;
+                const bmsMax = inputs.bmsMaxCurrent;
+                const invMaxCurrent = inputs.inverterMaxCurrent;
+                const invMaxPower = inputs.inverterMaxPower;
+                const efficiency = (inputs.chargeEfficiency || 90) / 100;
+                const slowdown = 1 + ((inputs.slowdownFactor || 10) / 100);
+
+                // السعة الكلية
+                const capacityKwh = (totalAh * V) / 1000;
+
+                // الشحن المطلوب
+                const currentAh = (totalAh * currentPercent) / 100;
+                const targetAh = (totalAh * targetPercent) / 100;
+                const neededAh = Math.max(0, targetAh - currentAh);
+                const neededEnergy = (neededAh * V) / 1000;
+
+                // تحديد أقصى تيار شحن
+                const maxCurrentByPower = invMaxPower / V;
+                const theoreticalMaxCurrent = Math.min(bmsMax, invMaxCurrent, maxCurrentByPower);
+
+                // تيار الشحن الفعلي (بعد تطبيق معامل الإبطاء)
+                const actualChargeCurrent = theoreticalMaxCurrent / slowdown;
+
+                // قدرة الشحن
+                const powerBeforeEfficiency = actualChargeCurrent * V;
+                const powerAfterEfficiency = powerBeforeEfficiency * efficiency;
+
+                // الوقت التقديري
+                const hoursNeeded = neededAh / (actualChargeCurrent * efficiency);
+
+                // تحويل الوقت إلى صيغة مقروءة
+                let timeString = '';
+                if (hoursNeeded <= 0 || neededAh <= 0) {
+                    timeString = 'البطارية مشحونة بالكامل';
+                } else if (hoursNeeded < 1) {
+                    const minutes = Math.round(hoursNeeded * 60);
+                    timeString = `${minutes} دقيقة`;
+                } else if (hoursNeeded < 24) {
+                    const hours = Math.floor(hoursNeeded);
+                    const minutes = Math.round((hoursNeeded - hours) * 60);
+                    timeString = `${hours} ساعة ${minutes > 0 ? `و ${minutes} دقيقة` : ''}`;
+                } else {
+                    const days = Math.floor(hoursNeeded / 24);
+                    const remainingHours = Math.round(hoursNeeded % 24);
+                    timeString = `${days} يوم ${remainingHours > 0 ? `و ${remainingHours} ساعة` : ''}`;
+                }
+
+                return {
+                    capacityKwh: capacityKwh.toFixed(2),
+                    currentChargeAh: currentAh.toFixed(1),
+                    currentChargePercent: currentPercent.toFixed(1),
+                    neededAh: neededAh.toFixed(1),
+                    neededEnergy: neededEnergy.toFixed(2),
+                    theoreticalMaxCurrent: theoreticalMaxCurrent.toFixed(1),
+                    maxCurrentByPower: maxCurrentByPower.toFixed(1),
+                    actualChargeCurrent: actualChargeCurrent.toFixed(1),
+                    powerBeforeEfficiency: Math.round(powerBeforeEfficiency),
+                    powerAfterEfficiency: Math.round(powerAfterEfficiency),
+                    hoursNeeded: hoursNeeded,
+                    timeString: timeString,
+                    efficiency: (efficiency * 100).toFixed(0),
+                    slowdown: slowdown.toFixed(2)
+                };
+            }
+
+            function showToast(message) {
+                let toast = document.querySelector('.toast');
+                if (toast) toast.remove();
+                const div = document.createElement('div');
+                div.className = 'toast';
+                div.innerText = message;
+                document.body.appendChild(div);
+                setTimeout(() => div.remove(), 3000);
+            }
+
+            // عرض الخطوة الأولى (إدخال البيانات الأساسية)
+            function renderStep1() {
+                const html = `
+                <div class="steps-container">
+                    <div class="step active" onclick="goToStep(1)">
+                        <i class="fas fa-battery-half"></i>
+                        <span>البيانات الأساسية</span>
+                    </div>
+                    <div class="step" onclick="goToStep(2)">
+                        <i class="fas fa-sliders-h"></i>
+                        <span>إعدادات متقدمة</span>
+                    </div>
+                    <div class="step" onclick="goToStep(3)">
+                        <i class="fas fa-chart-line"></i>
+                        <span>النتائج</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">
+                        <i class="fas fa-battery-full"></i>
+                        <span>مواصفات البطارية</span>
+                    </div>
+                    
+                    <div class="field">
+                        <label><i class="fas fa-bolt"></i> فولتية البطارية (V)</label>
+                        <input type="number" id="batteryVoltage" class="input-field" placeholder="مثال: 48" value="${inputs.batteryVoltage || ''}" step="1" min="12" max="1000" oninput="updateLinkedFieldsInStep1()">
+                    </div>
+                    
+                    <div class="field">
+                        <label><i class="fas fa-database"></i> سعة البطارية (Ah)</label>
+                        <input type="number" id="batteryCapacityAh" class="input-field" placeholder="مثال: 200" value="${inputs.batteryCapacityAh || ''}" step="10" min="10" max="10000" oninput="updateLinkedFieldsInStep1()">
+                    </div>
+                    
+                    <div class="info-note" style="margin-bottom: 16px;" id="capacityKwhDisplay">
+                        <i class="fas fa-calculator"></i>
+                        <span>السعة التقديرية: <strong>-- kWh</strong></span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">
+                        <i class="fas fa-charging-station"></i>
+                        <span>حالة الشحن</span>
+                    </div>
+                    
+                    <div class="field">
+                        <label><i class="fas fa-gauge-high"></i> الشحن الحالي (%)</label>
+                        <div class="slider-container">
+                            <input type="range" id="currentChargePercent" min="0" max="95" value="${inputs.currentChargePercent || 50}" step="5" 
+                                   oninput="document.getElementById('currentPercentDisplay').innerText = this.value + '%'; updateLinkedFieldsInStep1()">
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-top: 8px;">
+                            <span style="font-size: 0.8rem; color: var(--text-secondary);">0%</span>
+                            <span id="currentPercentDisplay" style="font-weight: 600; color: var(--primary);">${inputs.currentChargePercent || 50}%</span>
+                            <span style="font-size: 0.8rem; color: var(--text-secondary);">95%</span>
+                        </div>
+                        <div id="currentChargeAhDisplay" style="margin-top: 4px; font-size: 0.75rem; color: var(--text-secondary);">
+                            <i class="fas fa-info-circle"></i> الشحن الحالي: -- Ah
+                        </div>
+                    </div>
+                    
+                    <div class="field">
+                        <label><i class="fas fa-flag-checkered"></i> الشحن المطلوب (%)</label>
+                        <div class="slider-container">
+                            <input type="range" id="targetChargePercent" min="50" max="100" value="${inputs.targetChargePercent || 90}" step="5" 
+                                   oninput="document.getElementById('targetPercentDisplay').innerText = this.value + '%'">
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-top: 8px;">
+                            <span style="font-size: 0.8rem; color: var(--text-secondary);">50%</span>
+                            <span id="targetPercentDisplay" style="font-weight: 600; color: var(--primary);">${inputs.targetChargePercent || 90}%</span>
+                            <span style="font-size: 0.8rem; color: var(--text-secondary);">100%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn-primary" id="nextToStep2Btn" onclick="saveStep1AndNext()">
+                    <i class="fas fa-arrow-left"></i> التالي: إعدادات متقدمة
+                </button>
+            `;
+
+                document.getElementById('dynamicView').innerHTML = html;
+                setTimeout(updateLinkedFieldsInStep1, 50);
+            }
+
+            // عرض الخطوة الثانية (الإعدادات المتقدمة)
+            function renderStep2() {
+                const V = inputs.batteryVoltage || 48;
+                const invPower = inputs.inverterMaxPower || 5000;
+                const maxCurrentFromPower = invPower / V;
+                const bmsMax = inputs.bmsMaxCurrent || 100;
+                const invMax = inputs.inverterMaxCurrent || 80;
+                const theoreticalMax = Math.min(bmsMax, invMax, maxCurrentFromPower);
+
+                const html = `
+                <div class="steps-container">
+                    <div class="step completed" onclick="goToStep(1)">
+                        <i class="fas fa-battery-half"></i>
+                        <span>البيانات الأساسية</span>
+                    </div>
+                    <div class="step active" onclick="goToStep(2)">
+                        <i class="fas fa-sliders-h"></i>
+                        <span>إعدادات متقدمة</span>
+                    </div>
+                    <div class="step" onclick="goToStep(3)">
+                        <i class="fas fa-chart-line"></i>
+                        <span>النتائج</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">
+                        <i class="fas fa-microchip"></i>
+                        <span>حدود نظام الشحن</span>
+                    </div>
+                    
+                    <div class="field">
+                        <label><i class="fas fa-shield"></i> أقصى تيار شحن BMS (A)</label>
+                        <input type="number" id="bmsMaxCurrent" class="input-field" value="${inputs.bmsMaxCurrent || 100}" step="5" min="10" max="500" oninput="updateLinkedFieldsInStep2()">
+                    </div>
+                    
+                    <div class="field">
+                        <label><i class="fas fa-power-off"></i> أقصى تيار شحن من الانفرتر (A)</label>
+                        <input type="number" id="inverterMaxCurrent" class="input-field" value="${inputs.inverterMaxCurrent || 80}" step="5" min="10" max="500" oninput="updateLinkedFieldsInStep2()">
+                    </div>
+                    
+                    <div class="field">
+                        <label><i class="fas fa-bolt"></i> أقصى قدرة شحن من الانفرتر (W)</label>
+                        <input type="number" id="inverterMaxPower" class="input-field" value="${inputs.inverterMaxPower || 5000}" step="100" min="500" max="20000" oninput="updateLinkedFieldsInStep2()">
+                        <div id="maxCurrentFromPowerDisplay" style="margin-top: 4px; font-size: 0.75rem; color: var(--text-secondary);">
+                            <i class="fas fa-info-circle"></i> أقصى تيار متاح من القدرة: <strong>${maxCurrentFromPower.toFixed(1)} A</strong>
+                        </div>
+                    </div>
+                    
+                    <div class="info-note" style="margin-bottom: 16px;" id="theoreticalMaxDisplay">
+                        <i class="fas fa-gauge-high"></i>
+                        <span>أقصى تيار نظري: <strong>${theoreticalMax.toFixed(1)} A</strong></span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">
+                        <i class="fas fa-gear"></i>
+                        <span>معاملات الشحن</span>
+                    </div>
+                    
+                    <div class="field">
+                        <label><i class="fas fa-percent"></i> كفاءة الشحن (%)</label>
+                        <div class="slider-container">
+                            <input type="range" id="chargeEfficiency" min="70" max="98" value="${inputs.chargeEfficiency || 90}" step="1"
+                                   oninput="document.getElementById('efficiencyDisplay').innerText = this.value + '%'">
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-top: 8px;">
+                            <span style="font-size: 0.8rem; color: var(--text-secondary);">70%</span>
+                            <span id="efficiencyDisplay" style="font-weight: 600; color: var(--primary);">${inputs.chargeEfficiency || 90}%</span>
+                            <span style="font-size: 0.8rem; color: var(--text-secondary);">98%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="field">
+                        <label><i class="fas fa-turtle"></i> معامل الإبطاء (%)</label>
+                        <div class="slider-container">
+                            <input type="range" id="slowdownFactor" min="0" max="30" value="${inputs.slowdownFactor || 10}" step="5"
+                                   oninput="document.getElementById('slowdownDisplay').innerText = this.value + '%'">
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-top: 8px;">
+                            <span style="font-size: 0.8rem; color: var(--text-secondary);">0% (بدون إبطاء)</span>
+                            <span id="slowdownDisplay" style="font-weight: 600; color: var(--primary);">${inputs.slowdownFactor || 10}%</span>
+                            <span style="font-size: 0.8rem; color: var(--text-secondary);">30%</span>
+                        </div>
+                        <div style="margin-top: 8px; font-size: 0.75rem; color: var(--text-secondary);">
+                            <i class="fas fa-info-circle"></i> معامل الإبطاء يراعي عوامل مثل الحرارة وعمر البطارية
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn-primary" onclick="saveStep2AndCalculate()">
+                    <i class="fas fa-calculator"></i> احسب وقت الشحن
+                </button>
+                <button class="btn-secondary" onclick="goToStep(1)">
+                    <i class="fas fa-arrow-right"></i> العودة للبيانات الأساسية
+                </button>
+            `;
+
+                document.getElementById('dynamicView').innerHTML = html;
+            }
+
+            // عرض الخطوة الثالثة (النتائج)
+            function renderStep3() {
+                if (!calculationResult) {
+                    calculationResult = calculateChargingTime();
+                }
+
+                const r = calculationResult;
+
+                const html = `
+                <div class="steps-container">
+                    <div class="step completed" onclick="goToStep(1)">
+                        <i class="fas fa-battery-half"></i>
+                        <span>البيانات الأساسية</span>
+                    </div>
+                    <div class="step completed" onclick="goToStep(2)">
+                        <i class="fas fa-sliders-h"></i>
+                        <span>إعدادات متقدمة</span>
+                    </div>
+                    <div class="step active" onclick="goToStep(3)">
+                        <i class="fas fa-chart-line"></i>
+                        <span>النتائج</span>
+                    </div>
+                </div>
+
+                <div class="result-card">
+                    <div class="result-title">
+                        <i class="fas fa-clock"></i>
+                        <span>الوقت التقديري للشحن</span>
+                    </div>
+                    
+                    <div class="result-row">
+                        <span class="result-label"><i class="fas fa-hourglass-half"></i> الوقت المطلوب:</span>
+                        <span class="result-value highlight">${r.timeString}</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">
+                        <i class="fas fa-chart-simple"></i>
+                        <span>ملخص الحساب</span>
+                    </div>
+                    
+                    <div class="result-row">
+                        <span class="result-label"><i class="fas fa-battery-full"></i> سعة البطارية:</span>
+                        <span class="result-value">${inputs.batteryCapacityAh} Ah / ${r.capacityKwh} kWh</span>
+                    </div>
+                    
+                    <div class="result-row">
+                        <span class="result-label"><i class="fas fa-gauge"></i> الشحن الحالي:</span>
+                        <span class="result-value">${r.currentChargeAh} Ah (${r.currentChargePercent}%)</span>
+                    </div>
+                    
+                    <div class="result-row">
+                        <span class="result-label"><i class="fas fa-bolt"></i> الشحن المطلوب:</span>
+                        <span class="result-value">${r.neededAh} Ah / ${r.neededEnergy} kWh</span>
+                    </div>
+                    
+                    <div class="result-row">
+                        <span class="result-label"><i class="fas fa-microchip"></i> تيار الشحن الفعلي:</span>
+                        <span class="result-value">${r.actualChargeCurrent} A</span>
+                    </div>
+                    
+                    <div class="result-row">
+                        <span class="result-label"><i class="fas fa-charging-station"></i> قدرة الشحن:</span>
+                        <span class="result-value">${r.powerAfterEfficiency} W (بعد ${r.efficiency}% كفاءة)</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">
+                        <i class="fas fa-calculator"></i>
+                        <span>تفاصيل الحساب</span>
+                    </div>
+                    
+                    <div class="formula-badge">
+                        <i class="fas fa-equals"></i> تيار الشحن الفعلي = ${r.theoreticalMaxCurrent} ÷ ${r.slowdown} = ${r.actualChargeCurrent} A
+                    </div>
+                    
+                    <div class="formula-badge">
+                        <i class="fas fa-equals"></i> وقت الشحن = ${r.neededAh} ÷ (${r.actualChargeCurrent} × ${(r.efficiency / 100).toFixed(2)}) = ${r.hoursNeeded.toFixed(1)} ساعة
+                    </div>
+                    
+                    ${r.hoursNeeded > 8 ? `
+                    <div class="warning-card">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>وقت الشحن طويل نسبياً. قد تحتاج إلى زيادة تيار الشحن أو تقليل معامل الإبطاء.</span>
+                    </div>
+                    ` : ''}
+                </div>
+
+                <button class="btn-primary" onclick="goToStep(2)">
+                    <i class="fas fa-edit"></i> تعديل الإعدادات
+                </button>
+                <button class="btn-secondary" onclick="goToStep(1)">
+                    <i class="fas fa-arrow-right"></i> تعديل البيانات الأساسية
+                </button>
+            `;
+
+                document.getElementById('dynamicView').innerHTML = html;
+            }
+
+            // حفظ بيانات الخطوة الأولى
+            window.saveStep1AndNext = function () {
+                const V = parseFloat(document.getElementById('batteryVoltage')?.value);
+                const Ah = parseFloat(document.getElementById('batteryCapacityAh')?.value);
+                const currentPercent = parseFloat(document.getElementById('currentChargePercent')?.value);
+                const targetPercent = parseFloat(document.getElementById('targetChargePercent')?.value);
+
+                if (!V || V <= 0) {
+                    showToast('الرجاء إدخال فولتية البطارية');
+                    return;
+                }
+                if (!Ah || Ah <= 0) {
+                    showToast('الرجاء إدخال سعة البطارية');
+                    return;
+                }
+
+                inputs.batteryVoltage = V;
+                inputs.batteryCapacityAh = Ah;
+                inputs.currentChargePercent = currentPercent;
+                inputs.targetChargePercent = targetPercent;
+
+                if (!validateBasicInputs()) {
+                    return;
+                }
+
+                goToStep(2);
+            };
+
+            // حفظ بيانات الخطوة الثانية والحساب
+            window.saveStep2AndCalculate = function () {
+                inputs.bmsMaxCurrent = parseFloat(document.getElementById('bmsMaxCurrent')?.value) || 100;
+                inputs.inverterMaxCurrent = parseFloat(document.getElementById('inverterMaxCurrent')?.value) || 80;
+                inputs.inverterMaxPower = parseFloat(document.getElementById('inverterMaxPower')?.value) || 5000;
+                inputs.chargeEfficiency = parseFloat(document.getElementById('chargeEfficiency')?.value) || 90;
+                inputs.slowdownFactor = parseFloat(document.getElementById('slowdownFactor')?.value) || 10;
+
+                calculationResult = calculateChargingTime();
+                goToStep(3);
+            };
+
+            // تحديث الحقول المترابطة في النافذة الثانية (للوصول العام)
+            window.updateLinkedFieldsInStep2 = function () {
+                const V = inputs.batteryVoltage || 48;
+                const invPower = parseFloat(document.getElementById('inverterMaxPower')?.value) || 5000;
+
+                const maxCurrentFromPower = invPower / V;
+                const maxCurrentDisplay = document.getElementById('maxCurrentFromPowerDisplay');
+                if (maxCurrentDisplay) {
+                    maxCurrentDisplay.innerHTML = `<i class="fas fa-info-circle"></i> أقصى تيار متاح من القدرة: <strong>${maxCurrentFromPower.toFixed(1)} A</strong>`;
+                }
+
+                const bmsMax = parseFloat(document.getElementById('bmsMaxCurrent')?.value) || 100;
+                const invMax = parseFloat(document.getElementById('inverterMaxCurrent')?.value) || 80;
+                const theoreticalMax = Math.min(bmsMax, invMax, maxCurrentFromPower);
+
+                const theoreticalDisplay = document.getElementById('theoreticalMaxDisplay');
+                if (theoreticalDisplay) {
+                    theoreticalDisplay.innerHTML = `<i class="fas fa-gauge-high"></i> أقصى تيار نظري: <strong>${theoreticalMax.toFixed(1)} A</strong>`;
+                }
+            };
+
+            // تحديث الحقول المترابطة في النافذة الأولى
+            window.updateLinkedFieldsInStep1 = function () {
+                const V = parseFloat(document.getElementById('batteryVoltage')?.value) || 0;
+                const Ah = parseFloat(document.getElementById('batteryCapacityAh')?.value) || 0;
+
+                if (V > 0 && Ah > 0) {
+                    const capacityKwh = (Ah * V) / 1000;
+                    const kwhDisplay = document.getElementById('capacityKwhDisplay');
+                    if (kwhDisplay) {
+                        kwhDisplay.innerHTML = `<i class="fas fa-calculator"></i> السعة التقديرية: <strong>${capacityKwh.toFixed(2)} kWh</strong>`;
+                    }
+                }
+
+                const percent = parseFloat(document.getElementById('currentChargePercent')?.value) || 0;
+                if (Ah > 0) {
+                    const currentAh = (Ah * percent) / 100;
+                    const ahDisplay = document.getElementById('currentChargeAhDisplay');
+                    if (ahDisplay) {
+                        ahDisplay.innerHTML = `<i class="fas fa-info-circle"></i> الشحن الحالي: ${currentAh.toFixed(1)} Ah`;
+                    }
+                }
+            };
+
+            // التنقل بين الخطوات
+            window.goToStep = function (step) {
+                currentStep = step;
+
+                if (step === 1) {
+                    renderStep1();
+                } else if (step === 2) {
+                    renderStep2();
+                } else if (step === 3) {
+                    if (!calculationResult) {
+                        calculationResult = calculateChargingTime();
+                    }
+                    renderStep3();
+                }
+            };
+
+            // زر العودة للصفحة الرئيسية
+            document.getElementById('backBtn').addEventListener('click', () => {
+                if (confirm('هل تريد العودة للصفحة الرئيسية؟')) {
+                    window.location.href = 'index.html';
+                }
+            });
+
+            // منع القائمة المنبثقة
+            document.addEventListener('contextmenu', e => e.preventDefault());
+
+            // بدء التطبيق
+            renderStep1();
+
+            // منع الخروج بزر الرجوع
+            let backPressCount = 0;
+            let timeoutId = null;
+            history.pushState(null, null, location.href);
+
+            window.addEventListener('popstate', function () {
+                history.pushState(null, null, location.href);
+                backPressCount++;
+
+                if (backPressCount === 1) {
+                    showToast('اضغط مرة أخرى للخروج');
+                    timeoutId = setTimeout(() => { backPressCount = 0; }, 2000);
+                } else if (backPressCount >= 2) {
+                    clearTimeout(timeoutId);
+                    window.close();
+                }
+            });
+        })();
+    </script>
+</body>
+
+</html>

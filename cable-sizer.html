@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <title>QSolar | حاسبة مقاطع الكابلات</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #DC8623;
+            --primary-dark: #b56c1c;
+            --secondary: #2E438F;
+            --secondary-dark: #1f2f63;
+            --bg-dark: #0B1120;
+            --surface: #111827;
+            --surface-light: #1F2937;
+            --text-primary: #F3F4F6;
+            --text-secondary: #9CA3AF;
+            --success: #10B981;
+            --danger: #EF4444;
+            --warning: #F59E0B;
+            --border: #2D3A4F;
+            --transition: all 0.25s cubic-bezier(0.2, 0, 0, 1);
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            direction: rtl;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            background: var(--surface);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .header {
+            background: var(--primary);
+            padding: 18px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom-left-radius: 24px;
+            border-bottom-right-radius: 24px;
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.3);
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background-image: url('1774361357592.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+        }
+
+        .logo-area h1 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .back-btn {
+            background: rgba(0, 0, 0, 0.2);
+            border: none;
+            width: 42px;
+            height: 42px;
+            border-radius: 30px;
+            color: white;
+            font-size: 1.3rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .back-btn:active {
+            transform: scale(0.92);
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 20px 18px;
+            overflow-y: auto;
+            padding-bottom: 40px;
+        }
+
+        .tool-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--primary);
+        }
+
+        .tool-title i {
+            font-size: 2rem;
+            color: var(--primary);
+        }
+
+        .tool-title h2 {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .input-card {
+            background: var(--surface-light);
+            border-radius: 24px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+            transition: var(--transition);
+        }
+
+        .input-group {
+            margin-bottom: 18px;
+        }
+
+        .input-group label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+        }
+
+        .input-group label i {
+            color: var(--primary);
+            width: 20px;
+        }
+
+        .input-field {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 14px 16px;
+            width: 100%;
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-family: inherit;
+            transition: var(--transition);
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(220, 134, 35, 0.15);
+        }
+
+        .input-field[type="number"] {
+            -moz-appearance: textfield;
+        }
+
+        .input-field[type="number"]::-webkit-inner-spin-button,
+        .input-field[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .row-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        /* Custom Select */
+        .custom-select {
+            position: relative;
+            width: 100%;
+        }
+
+        .select-selected {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 14px 16px;
+            color: var(--text-primary);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: var(--transition);
+        }
+
+        .select-selected i {
+            color: var(--primary);
+            transition: var(--transition);
+        }
+
+        .select-selected:active {
+            border-color: var(--primary);
+        }
+
+        .select-items {
+            position: absolute;
+            background: var(--surface);
+            top: calc(100% + 4px);
+            left: 0;
+            right: 0;
+            z-index: 99;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            max-height: 220px;
+            overflow-y: auto;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-8px);
+            transition: all 0.2s ease;
+        }
+
+        .select-items.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .select-item {
+            padding: 14px 16px;
+            cursor: pointer;
+            border-bottom: 1px solid var(--border);
+            transition: background 0.15s;
+            color: var(--text-primary);
+        }
+
+        .select-item:last-child {
+            border-bottom: none;
+        }
+
+        .select-item:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .select-item.selected-active {
+            background: var(--primary-dark);
+            color: white;
+        }
+
+        .calculate-btn {
+            background: var(--primary);
+            border: none;
+            width: 100%;
+            padding: 16px;
+            border-radius: 48px;
+            font-weight: bold;
+            font-size: 1rem;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 20px;
+            box-shadow: 0 4px 12px rgba(220, 134, 35, 0.2);
+        }
+
+        .calculate-btn:active {
+            transform: scale(0.97);
+            box-shadow: 0 2px 6px rgba(220, 134, 35, 0.2);
+        }
+
+        .calculate-btn i {
+            font-size: 1.1rem;
+        }
+
+        .result-card {
+            background: var(--surface-light);
+            border-radius: 24px;
+            padding: 20px;
+            margin-top: 20px;
+            border-right: 4px solid var(--success);
+            animation: fadeSlide 0.4s ease-out;
+        }
+
+        @keyframes fadeSlide {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .result-title i {
+            color: var(--success);
+        }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px dashed var(--border);
+        }
+
+        .result-row:last-child {
+            border-bottom: none;
+        }
+
+        .result-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .result-value {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .result-value.highlight {
+            color: var(--primary);
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .warning-box {
+            background: rgba(245, 158, 11, 0.08);
+            border-right: 4px solid var(--warning);
+            padding: 14px;
+            border-radius: 12px;
+            margin-top: 16px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .warning-box i {
+            color: var(--warning);
+            font-size: 1.1rem;
+            margin-top: 2px;
+        }
+
+        .info-note {
+            background: rgba(46, 67, 143, 0.15);
+            border-radius: 12px;
+            padding: 14px;
+            margin-top: 20px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            color: var(--border);
+            margin-bottom: 16px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--surface-light);
+            backdrop-filter: blur(12px);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 60px;
+            font-size: 0.85rem;
+            z-index: 200;
+            max-width: 85%;
+            text-align: center;
+            animation: toastSlide 0.3s ease-out;
+            border: 1px solid var(--border);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        @keyframes toastSlide {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-container">
+        <div class="header">
+            <div class="logo-area">
+                <div class="logo-icon"></div>
+                <h1>QSolar</h1>
+            </div>
+            <button class="back-btn" id="backBtn">
+                <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
+
+        <div class="main-content">
+            <div class="tool-title">
+                <i class="fas fa-plug"></i>
+                <h2>حاسبة مقاطع الكابلات</h2>
+            </div>
+
+            <div class="input-card">
+                <div class="input-group">
+                    <label><i class="fas fa-bolt"></i> التيار (أمبير)</label>
+                    <input type="number" id="current" class="input-field" placeholder="أدخل قيمة التيار" min="0.1"
+                        step="0.1">
+                </div>
+
+                <div class="row-2">
+                    <div class="input-group">
+                        <label><i class="fas fa-ruler"></i> المسافة (متر)</label>
+                        <input type="number" id="distance" class="input-field" placeholder="طول الكابل" min="0.1"
+                            step="0.1">
+                    </div>
+                    <div class="input-group">
+                        <label><i class="fas fa-battery-full"></i> الجهد (فولت)</label>
+                        <input type="number" id="voltage" class="input-field" placeholder="جهد النظام" min="1" step="1">
+                    </div>
+                </div>
+
+                <div class="row-2">
+                    <div class="input-group">
+                        <label><i class="fas fa-microchip"></i> نوع المادة</label>
+                        <div class="custom-select" id="materialSelect">
+                            <div class="select-selected" id="materialSelected">
+                                <span id="materialText">نحاس</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                            <div class="select-items" id="materialItems">
+                                <div class="select-item" data-value="copper">نحاس </div>
+                                <div class="select-item" data-value="aluminum">ألمنيوم </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label><i class="fas fa-thermometer-half"></i> درجة الحرارة (°C)</label>
+                        <input type="number" id="temperature" class="input-field" placeholder="مثال: 40" min="-10"
+                            max="80" step="1">
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label><i class="fas fa-chart-line"></i> نسبة هبوط الجهد المسموحة (%)</label>
+                    <div class="custom-select" id="vdSelect">
+                        <div class="select-selected" id="vdSelected">
+                            <span id="vdText">3% (قياسي)</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="select-items" id="vdItems">
+                            <div class="select-item" data-value="1">1% (حرج)</div>
+                            <div class="select-item" data-value="2">2% (دقيق)</div>
+                            <div class="select-item" data-value="3">3% (قياسي)</div>
+                            <div class="select-item" data-value="5">5% (مسموح)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="calculate-btn" id="calculateBtn">
+                    <i class="fas fa-calculator"></i> احسب المقطع المناسب
+                </button>
+            </div>
+
+            <div id="resultContainer">
+                <div class="empty-state">
+                    <i class="fas fa-arrow-up"></i>
+                    <p>أدخل بيانات النظام واضغط على "احسب المقطع المناسب"</p>
+                </div>
+            </div>
+
+            <div class="info-note">
+                <i class="fas fa-info-circle"></i>
+                <span>تعتمد الحسابات على مقاومة النحاس 0.0175 والألمنيوم 0.0282 أوم.مم²/م مع مراعاة معامل الحرارة</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            // ==================== كلاس الحساب ====================
+            class CableSizer {
+                constructor(current, distance, voltage, material, ambientTemp, maxVoltageDropPercent) {
+                    this.current = parseFloat(current);
+                    this.distance = parseFloat(distance);
+                    this.voltage = parseFloat(voltage);
+                    this.material = material;
+                    this.ambientTemp = parseFloat(ambientTemp);
+                    this.maxVoltageDropPercent = parseFloat(maxVoltageDropPercent);
+                    this.resistivity = material === 'copper' ? 0.0175 : 0.0282;
+                }
+
+                calculateMinCrossSection() {
+                    const maxVoltageDropVolts = (this.voltage * this.maxVoltageDropPercent) / 100;
+                    return (2 * this.resistivity * this.distance * this.current) / maxVoltageDropVolts;
+                }
+
+                roundToStandardArea(area) {
+                    const standardAreas = [1.5, 2.5, 4, 6, 10, 16, 25, 35, 50, 70, 95, 120, 150, 185, 240, 300, 400, 500, 630];
+                    for (let std of standardAreas) {
+                        if (std >= area) return std;
+                    }
+                    return Math.ceil(area / 50) * 50;
+                }
+
+                calculateActualVoltageDrop(area) {
+                    const resistance = (2 * this.resistivity * this.distance) / area;
+                    const voltageDrop = resistance * this.current;
+                    const percentage = (voltageDrop / this.voltage) * 100;
+                    return { volts: voltageDrop, percentage: percentage };
+                }
+
+                calculateDeratingFactor() {
+                    if (this.ambientTemp <= 30) return 1;
+                    if (this.ambientTemp <= 35) return 0.94;
+                    if (this.ambientTemp <= 40) return 0.87;
+                    if (this.ambientTemp <= 45) return 0.79;
+                    if (this.ambientTemp <= 50) return 0.71;
+                    return 0.61;
+                }
+
+                getThermalCapacity(area) {
+                    const capacities = {
+                        1.5: 15, 2.5: 21, 4: 28, 6: 36, 10: 50, 16: 68,
+                        25: 89, 35: 110, 50: 133, 70: 170, 95: 210, 120: 240,
+                        150: 275, 185: 310, 240: 365, 300: 415, 400: 500, 500: 600
+                    };
+                    const baseCapacity = capacities[area] || (area * 1.2);
+                    const derating = this.calculateDeratingFactor();
+                    return (baseCapacity * derating).toFixed(0);
+                }
+
+                getRecommendation(area, actualVoltageDrop) {
+                    if (actualVoltageDrop.percentage > this.maxVoltageDropPercent) {
+                        return {
+                            type: 'warning',
+                            message: `هبوط الجهد (${actualVoltageDrop.percentage.toFixed(2)}%) أعلى من المسموح (${this.maxVoltageDropPercent}%). يفضل استخدام مقطع أكبر.`
+                        };
+                    }
+                    if (actualVoltageDrop.percentage > this.maxVoltageDropPercent * 0.8) {
+                        return {
+                            type: 'info',
+                            message: `هبوط الجهد قريب من الحد المسموح (${actualVoltageDrop.percentage.toFixed(2)}%). يمكن استخدام مقطع أعلى للتحسين.`
+                        };
+                    }
+                    return {
+                        type: 'success',
+                        message: `هبوط الجهد ضمن الحد المسموح (${actualVoltageDrop.percentage.toFixed(2)}% < ${this.maxVoltageDropPercent}%). التصميم مناسب.`
+                    };
+                }
+
+                calculatePowerLoss(area) {
+                    const resistance = (2 * this.resistivity * this.distance) / area;
+                    return Math.pow(this.current, 2) * resistance;
+                }
+
+                calculate() {
+                    if (isNaN(this.current) || this.current <= 0) throw new Error('التيار غير صالح');
+                    if (isNaN(this.distance) || this.distance <= 0) throw new Error('المسافة غير صالحة');
+                    if (isNaN(this.voltage) || this.voltage <= 0) throw new Error('الجهد غير صالح');
+                    if (isNaN(this.ambientTemp) || this.ambientTemp < -10 || this.ambientTemp > 80) throw new Error('درجة الحرارة غير صالحة');
+
+                    const minArea = this.calculateMinCrossSection();
+                    const recommendedArea = this.roundToStandardArea(minArea);
+                    const actualDrop = this.calculateActualVoltageDrop(recommendedArea);
+                    const thermalCapacity = this.getThermalCapacity(recommendedArea);
+                    const powerLoss = this.calculatePowerLoss(recommendedArea);
+                    const deratingFactor = this.calculateDeratingFactor();
+                    const largerArea = this.roundToStandardArea(recommendedArea * 1.5);
+                    const largerDrop = this.calculateActualVoltageDrop(largerArea);
+
+                    return {
+                        minArea: minArea.toFixed(2),
+                        recommendedArea: recommendedArea,
+                        actualVoltageDrop: {
+                            volts: actualDrop.volts.toFixed(2),
+                            percentage: actualDrop.percentage.toFixed(2)
+                        },
+                        thermalCapacity: thermalCapacity,
+                        powerLoss: powerLoss.toFixed(1),
+                        deratingFactor: deratingFactor,
+                        recommendation: this.getRecommendation(recommendedArea, actualDrop),
+                        alternative: {
+                            area: largerArea,
+                            voltageDrop: largerDrop.percentage.toFixed(2)
+                        }
+                    };
+                }
+            }
+
+            // ==================== عناصر DOM ====================
+            const currentInput = document.getElementById('current');
+            const distanceInput = document.getElementById('distance');
+            const voltageInput = document.getElementById('voltage');
+            const temperatureInput = document.getElementById('temperature');
+            const calculateBtn = document.getElementById('calculateBtn');
+            const resultContainer = document.getElementById('resultContainer');
+            const backBtn = document.getElementById('backBtn');
+
+            // قيم افتراضية للمحددات المخصصة
+            let currentMaterial = 'copper';
+            let currentVD = '3';
+
+            // ==================== القوائم المنسدلة المخصصة ====================
+            function initCustomSelect(selectId, selectedId, itemsId, textId, onChange) {
+                const selectEl = document.getElementById(selectId);
+                const selectedEl = document.getElementById(selectedId);
+                const itemsEl = document.getElementById(itemsId);
+                const textEl = document.getElementById(textId);
+
+                if (!selectEl || !selectedEl || !itemsEl) return;
+
+                selectedEl.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    itemsEl.classList.toggle('show');
+                    const icon = selectedEl.querySelector('i');
+                    if (icon) {
+                        icon.style.transform = itemsEl.classList.contains('show') ? 'rotate(180deg)' : 'rotate(0)';
+                    }
+                });
+
+                itemsEl.querySelectorAll('.select-item').forEach(item => {
+                    item.addEventListener('click', function () {
+                        const value = this.dataset.value;
+                        const text = this.textContent;
+                        textEl.textContent = text;
+
+                        itemsEl.querySelectorAll('.select-item').forEach(i => i.classList.remove('selected-active'));
+                        this.classList.add('selected-active');
+
+                        itemsEl.classList.remove('show');
+                        const icon = selectedEl.querySelector('i');
+                        if (icon) icon.style.transform = 'rotate(0)';
+
+                        if (onChange) onChange(value);
+                    });
+                });
+
+                // تعيين القيمة الافتراضية
+                const defaultItem = itemsEl.querySelector(`.select-item[data-value="${textId === 'materialText' ? 'copper' : '3'}"]`);
+                if (defaultItem) {
+                    defaultItem.classList.add('selected-active');
+                }
+            }
+
+            // تهيئة القوائم
+            initCustomSelect('materialSelect', 'materialSelected', 'materialItems', 'materialText', (val) => {
+                currentMaterial = val;
+            });
+
+            initCustomSelect('vdSelect', 'vdSelected', 'vdItems', 'vdText', (val) => {
+                currentVD = val;
+            });
+
+            // إغلاق القوائم عند النقر خارجها
+            document.addEventListener('click', () => {
+                document.querySelectorAll('.select-items').forEach(el => {
+                    el.classList.remove('show');
+                    const parent = el.closest('.custom-select');
+                    if (parent) {
+                        const icon = parent.querySelector('.select-selected i');
+                        if (icon) icon.style.transform = 'rotate(0)';
+                    }
+                });
+            });
+
+            // ==================== دوال مساعدة ====================
+            function showToast(message, duration = 3000) {
+                let toast = document.querySelector('.toast');
+                if (toast) toast.remove();
+                const div = document.createElement('div');
+                div.className = 'toast';
+                div.innerText = message;
+                document.body.appendChild(div);
+                setTimeout(() => {
+                    div.style.opacity = '0';
+                    div.style.transition = 'opacity 0.2s';
+                    setTimeout(() => div.remove(), 200);
+                }, duration);
+            }
+
+            function formatNumber(num) {
+                return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            }
+
+            // ==================== عرض النتائج ====================
+            function displayResults(results) {
+                const materialName = currentMaterial === 'copper' ? 'نحاس' : 'ألمنيوم';
+                const isWarning = results.recommendation.type === 'warning';
+                const isInfo = results.recommendation.type === 'info';
+
+                let recommendationIcon = '';
+                if (isWarning) recommendationIcon = '<i class="fas fa-exclamation-triangle"></i>';
+                else if (isInfo) recommendationIcon = '<i class="fas fa-info-circle"></i>';
+                else recommendationIcon = '<i class="fas fa-check-circle" style="color:var(--success);"></i>';
+
+                const html = `
+                    <div class="result-card">
+                        <div class="result-title">
+                            <i class="fas fa-chart-line"></i>
+                            <span>نتيجة الحساب</span>
+                        </div>
+                        
+                        <div class="result-row">
+                            <span class="result-label"><i class="fas fa-cube"></i> المقطع المطلوب نظرياً:</span>
+                            <span class="result-value">${results.minArea} mm²</span>
+                        </div>
+                        
+                        <div class="result-row">
+                            <span class="result-label"><i class="fas fa-check-double"></i> المقطع القياسي الموصى به:</span>
+                            <span class="result-value highlight">${results.recommendedArea} mm²</span>
+                        </div>
+                        
+                        <div class="result-row">
+                            <span class="result-label"><i class="fas fa-tachometer-alt"></i> هبوط الجهد الفعلي:</span>
+                            <span class="result-value">${results.actualVoltageDrop.volts} V (${results.actualVoltageDrop.percentage}%)</span>
+                        </div>
+                        
+                        <div class="result-row">
+                            <span class="result-label"><i class="fas fa-fire"></i> قدرة التحمل الحرارية:</span>
+                            <span class="result-value">${formatNumber(results.thermalCapacity)} أمبير</span>
+                        </div>
+                        
+                        <div class="result-row">
+                            <span class="result-label"><i class="fas fa-charging-station"></i> الطاقة المفقودة:</span>
+                            <span class="result-value">${formatNumber(results.powerLoss)} واط</span>
+                        </div>
+                        
+                        <div class="result-row">
+                            <span class="result-label"><i class="fas fa-thermometer-half"></i> معامل تخفيض الحرارة:</span>
+                            <span class="result-value">${(results.deratingFactor * 100).toFixed(0)}%</span>
+                        </div>
+                        
+                        <div class="warning-box">
+                            ${recommendationIcon}
+                            <span>${results.recommendation.message}</span>
+                        </div>
+                        
+                        ${results.alternative.area > results.recommendedArea ? `
+                        <div class="info-note" style="margin-top: 16px;">
+                            <i class="fas fa-lightbulb"></i>
+                            <span>اقتراح: يمكن استخدام مقطع ${results.alternative.area} mm² لتحسين الأداء (هبوط جهد ${results.alternative.voltageDrop}%)</span>
+                        </div>
+                        ` : ''}
+                        
+                        <div class="info-note" style="margin-top: 12px;">
+                            <i class="fas fa-microchip"></i>
+                            <span>نوع المادة: ${materialName} | درجة الحرارة: ${temperatureInput.value || '--'}°C</span>
+                        </div>
+                    </div>
+                `;
+
+                resultContainer.innerHTML = html;
+                resultContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+
+            // ==================== تنفيذ الحساب ====================
+            function performCalculation() {
+                const current = currentInput.value;
+                const distance = distanceInput.value;
+                const voltage = voltageInput.value;
+                const temperature = temperatureInput.value;
+
+                if (!current || current <= 0) {
+                    showToast('الرجاء إدخال تيار صحيح أكبر من صفر');
+                    currentInput.focus();
+                    return;
+                }
+                if (!distance || distance <= 0) {
+                    showToast('الرجاء إدخال مسافة صحيحة أكبر من صفر');
+                    distanceInput.focus();
+                    return;
+                }
+                if (!voltage || voltage <= 0) {
+                    showToast('الرجاء إدخال جهد صحيح أكبر من صفر');
+                    voltageInput.focus();
+                    return;
+                }
+                if (!temperature || temperature < -10 || temperature > 80) {
+                    showToast('الرجاء إدخال درجة حرارة بين -10 و 80 درجة مئوية');
+                    temperatureInput.focus();
+                    return;
+                }
+
+                try {
+                    const sizer = new CableSizer(current, distance, voltage, currentMaterial, temperature, currentVD);
+                    const results = sizer.calculate();
+                    displayResults(results);
+                } catch (error) {
+                    showToast(error.message);
+                }
+            }
+
+            // ==================== الأحداث ====================
+            calculateBtn.addEventListener('click', performCalculation);
+
+            const inputs = [currentInput, distanceInput, voltageInput, temperatureInput];
+            inputs.forEach(input => {
+                input.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        performCalculation();
+                    }
+                });
+            });
+
+            backBtn.addEventListener('click', () => {
+                window.location.href = 'index.html';
+            });
+
+            // منع القائمة المنبثقة
+            document.addEventListener('contextmenu', e => e.preventDefault());
+        })();
+    </script>
+</body>
+
+</html>
