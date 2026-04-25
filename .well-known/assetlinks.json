@@ -2,7 +2,7 @@
       "relation": ["delegate_permission/common.handle_all_urls"],
       "target": {
         "namespace": "android_app",
-        "package_name": "io.github.hadiiik.twa",
-        "sha256_cert_fingerprints": ["3D:59:E1:B4:0C:11:04:BC:5B:0C:1E:AA:AE:2D:EA:7F:84:47:76:59:D6:6A:42:52:32:60:97:5D:CD:E2:F3:B3"]
+        "package_name": "app.vercel.q_solar.twa",
+        "sha256_cert_fingerprints": ["C7:9D:5B:7F:A4:D4:CE:2F:09:82:0C:CD:62:C7:8B:CE:07:8A:E1:DD:47:79:F2:50:45:8F:E9:D2:29:1A:9D:77"]
       }
     }]
