@@ -425,6 +425,24 @@
             padding-bottom: 8px;
         }
 
+        .brand-stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .brand-stat-item {
+            background: var(--surface);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
         @keyframes fadeSlide {
             from {
                 opacity: 0;
@@ -475,8 +493,7 @@
                         <i class="fas fa-chevron-down"></i>
                     </div>
                     <div class="select-items" id="selectItems">
-                        <div class="select-item" data-value="all">جميع الماركات</div>
-                        <div class="select-item" data-value="deye">Deye (انفرترات هجين / ربط شبكي)</div>
+                        <!-- سيتم ملؤها ديناميكياً من JavaScript -->
                     </div>
                 </div>
 
@@ -491,7 +508,8 @@
                 <div class="search-wrapper">
                     <div class="error-input-group">
                         <i class="fas fa-barcode"></i>
-                        <input type="text" id="errorCodeInput" placeholder="مثال: F07 , F64 , F58" autocomplete="off">
+                        <input type="text" id="errorCodeInput" placeholder="مثال: F07 , F64 , F58 , VE01"
+                            autocomplete="off">
                     </div>
                     <div class="suggestions-box" id="suggestionsBox"></div>
                 </div>
@@ -505,18 +523,44 @@
                 <div class="no-results" id="initialMessage">
                     <i class="fas fa-lightbulb" style="font-size: 2rem; margin-bottom: 12px; display: block;"></i>
                     <p>اختر ماركة أو اكتب رمز خطأ للبحث عن الحل المناسب</p>
-                    <p style="font-size: 0.8rem; margin-top: 8px;">مثال: F07 (جهد الشبكة خارج النطاق)</p>
+                    <div class="brand-stats" id="brandStats"></div>
                 </div>
             </div>
-            <div class="footer-note">
-                <i class="fas fa-database"></i> قاعدة بيانات محدثة | Deye | اعطال شائعة وحلول
+            <div class="footer-note" id="footerNote">
+                <i class="fas fa-database"></i> <span id="footerStats">تحميل قاعدة البيانات...</span>
             </div>
         </div>
     </div>
 
     <script>
         (function () {
+            // ===================== تكوين الماركات =====================
+            // 🎯 أضف أي ماركة جديدة هنا فقط وسيتم التعرف عليها تلقائياً في كل مكان
+            const brandConfig = {
+                all: {
+                    name: 'جميع الماركات',
+                    icon: 'fa-globe',
+                    color: '#6B7280'
+                },
+                deye: {
+                    name: 'Deye',
+                    icon: 'fa-solar-panel',
+                    color: '#DC8623'
+                },
+                sinexcel: {
+                    name: 'sinexcel ',
+                    icon: 'fa-bolt',
+                    color: '#003366'
+                },
+                growatt: {
+                    name: 'voltronic ',
+                    icon: 'fa-charging-station',
+                    color: '#00A3E0'
+                },
+            };
+
             // ===================== قاعدة بيانات الأعطال =====================
+            // 🎯 أضف أعطال أي ماركة جديدة هنا فقط
             const errorDatabase = {
                 deye: [
                     { code: "F01", description: "عكس قطبية الإدخال DC", solution: "التأكد من قطبية توصيل الألواح الشمسية (+ و -).", tip: "استخدم مقياس الفولتميتر للتأكد من القطبية." },
@@ -555,11 +599,161 @@
                     { code: "F58", description: "فشل اتصال BMS", solution: "انقطاع الاتصال بين الانفرتر و BMS.", tip: "افحص كابل RS485/CAN." },
                     { code: "F63", description: "خطأ ARC", solution: "فحص توصيلات كابلات الألواح.", tip: "قد يكون هناك قوس كهربائي." },
                     { code: "F64", description: "ارتفاع درجة حرارة المشتت الحراري", solution: "إيقاف التشغيل لمدة 10 دقائق.", tip: "نظف المراوح وفتحات التهوية." }
+                ],
+                
+                sinexcel: [
+                    { code: "0", description: "ارتفاع جهد التيار المتردد", solution: "افصل الطاقة، تحقق من جهد الشبكة. بعد زوال العطل، أعد تشغيل العاكس.", tip: "قد يكون بسبب تقلبات الشبكة." },
+                    { code: "1", description: "انخفاض جهد التيار المتردد", solution: "افصل الطاقة، تحقق من جهد الشبكة. بعد زوال العطل، أعد تشغيل العاكس.", tip: "قد يكون بسبب تقلبات الشبكة." },
+                    { code: "2", description: "ارتفاع تردد التيار المتردد", solution: "افصل الطاقة، تحقق من تردد الشبكة. بعد زوال العطل، أعد تشغيل العاكس.", tip: "قد يكون بسبب تقلبات الشبكة." },
+                    { code: "3", description: "انخفاض تردد التيار المتردد", solution: "افصل الطاقة، تحقق من تردد الشبكة. بعد زوال العطل، أعد تشغيل العاكس.", tip: "قد يكون بسبب تقلبات الشبكة." },
+                    { code: "4", description: "عدم توازن جهد الشبكة", solution: "افصل الطاقة، تأكد من توصيلات الشبكة. بعد زوال العطل، أعد تشغيل العاكس.", tip: "قد يكون بسبب انقطاع في أحد الأطوار." },
+                    { code: "5", description: "انعكاس طور التيار المتردد", solution: "تحقق من تسلسل الأطوار والتوصيلات.", tip: "قد يكون بسبب توصيل خاطئ لأسلاك الشبكة." },
+                    { code: "6", description: "حماية الانعزال (Islanding)", solution: "افصل الطاقة، تأكد من توصيلات الشبكة. بعد زوال العطل، أعد تشغيل العاكس.", tip: "قد يكون بسبب انقطاع التيار عن الشبكة." },
+                    { code: "7", description: "خطأ في التبديل بين ربط الشبكة وعدم ربطها", solution: "افصل الطاقة، تحقق من المفتاح. بعد زوال العطل، أعد تشغيل العاكس.", tip: "إذا استمر الخلل، اتصل بالدعم الفني." },
+                    { code: "8", description: "خطأ في التأريض", solution: "افحص مقاومة سلسلة الألواح للتأريض. إذا كانت المقاومة أقل من 16.67 كيلو أوم، تحقق من نقطة القصر وصححها.", tip: "قد يكون بسبب خلل في التأريض الواقي للعاكس." },
+                    { code: "9", description: "فشل في قفل طور الشبكة", solution: "تحقق من جهد الشبكة وترددها.", tip: "قد يكون بسبب تشوه في موجة الجهد." },
+                    { code: "A", description: "ارتفاع درجة الحرارة الداخلية للمحافظة", solution: "حسّن التهوية، قلل الحمل.", tip: "تأكد من عدم وجود عوائق أمام مراوح التبريد." },
+                    { code: "B", description: "انتهاء مهلة فحص الشبكة", solution: "تحقق من توصيلات الشبكة وإعدادات المعايير.", tip: "قد يكون بسبب عدم استقرار الشبكة." },
+                    { code: "10", description: "إيقاف طارئ", solution: "أعد ضبط زر الإيقاف الطارئ (EPO). بعد 20 ثانية، سيزول الخلل.", tip: "تأكد من أن زر EPO في الوضع الصحيح." },
+                    { code: "11", description: "إعداد غير صحيح (Init fault)", solution: "أعد تشغيل العاكس.", tip: "قد يكون بسبب خطأ في إعدادات المعامل." },
+                    { code: "12", description: "خطأ في إصدار DSP", solution: "إذا استمر الخلل، اتصل بالدعم الفني.", tip: "قد يتطلب تحديث البرنامج الثابت." },
+                    { code: "13", description: "خطأ في إصدار CPLD", solution: "إذا استمر الخلل، اتصل بالدعم الفني.", tip: "قد يتطلب تحديث البرنامج الثابت." },
+                    { code: "14", description: "خطأ في إصدار الأجهزة", solution: "إذا استمر الخلل، اتصل بالدعم الفني.", tip: "قد يشير إلى عطل في الأجهزة." },
+                    { code: "15", description: "فشل في اتصال CAN", solution: "افصل الطاقة، تحقق من كابل CAN. بعد زوال العطل، أعد تشغيل العاكس.", tip: "قد يكون بسبب قطع في الاتصال." },
+                    { code: "16", description: "فشل في مصدر الطاقة الإضافي", solution: "افصل الطاقة، تحقق من مصدر الطاقة. بعد زوال العطل، أعد تشغيل العاكس.", tip: "إذا استمر الخلل، اتصل بالدعم الفني." },
+                    { code: "17", description: "فشل في المروحة", solution: "تحقق من عمل المروحة، نظف العوائق.", tip: "إذا كانت المروحة لا تعمل، قد تحتاج إلى استبدال." },
+                    { code: "18", description: "ارتفاع جهد حافلة التيار المستمر", solution: "افصل الطاقة، تحقق من جهد البطارية والألواح. بعد زوال العطل، أعد تشغيل العاكس.", tip: "قد يكون بسبب ارتفاع جهد البطارية." },
+                    { code: "19", description: "انخفاض جهد حافلة التيار المستمر", solution: "افصل الطاقة، تحقق من جهد البطارية والألواح. بعد زوال العطل، أعد تشغيل العاكس.", tip: "قد يكون بسبب انخفاض جهد البطارية." },
+                    { code: "1A", description: "عدم توازن جهد حافلة التيار المستمر", solution: "إذا استمر الخلل، اتصل بالدعم الفني.", tip: "قد يشير إلى عطل داخلي." },
+                    { code: "1C", description: "ماس كهربائي في مرحل التيار المتردد", solution: "افصل الطاقة، تحقق من توصيلات التيار المتردد. بعد زوال العطل، أعد تشغيل العاكس.", tip: "قد يكون بسبب عطل في المرحل." },
+                    { code: "1D", description: "جهد خرج غير طبيعي", solution: "إذا استمر الخلل، اتصل بالدعم الفني.", tip: "قد يشير إلى عطل داخلي." },
+                    { code: "1E", description: "عدم توازن تيار الخرج", solution: "إذا استمر الخلل، اتصل بالدعم الفني.", tip: "قد يشير إلى عطل داخلي." },
+                    { code: "1F", description: "ارتفاع درجة حرارة المبدد الحراري", solution: "حسّن التهوية، قلل الحمل.", tip: "قد يكون بسبب انسداد فتحات التهوية." },
+                    { code: "20", description: "انتهاء مهلة الحمل الزائد للخرج", solution: "قلل الحمل.", tip: "قد يكون بسبب توصيل أحمال كبيرة جدًا." },
+                    { code: "21", description: "ارتفاع جهد الشبكة لفترة طويلة", solution: "افصل الطاقة، تحقق من جهد الشبكة. بعد زوال العطل، أعد تشغيل العاكس.", tip: "قد يكون بسبب عدم استقرار الشبكة." },
+                    { code: "22", description: "فشل البدء الناعم للتيار المتردد", solution: "أعد تشغيل العاكس.", tip: "إذا استمر الخلل، اتصل بالدعم الفني." },
+                    { code: "23", description: "فشل بدء تشغيل العاكس", solution: "أعد تشغيل العاكس.", tip: "إذا استمر الخلل، اتصل بالدعم الفني." },
+                    { code: "24", description: "دائرة مفتوحة في مرحل التيار المتردد", solution: "افصل الطاقة، تحقق من مرحل التيار المتردد. بعد زوال العطل، أعد تشغيل العاكس.", tip: "قد يكون بسبب عطل في المرحل." },
+                    { code: "25", description: "فشل في اتصال U2", solution: "تحقق من الاتصال باللوحة U2.", tip: "قد يكون بسبب قطع في الكابل." },
+                    { code: "26", description: "زيادة مكون التيار المستمر في التيار المتردد", solution: "إذا استمر الخلل، اتصل بالدعم الفني.", tip: "قد يشير إلى عطل في الأجهزة." },
+                    { code: "27", description: "خلل في أخذ العينات بين الرئيسي والتابع", solution: "أعد تشغيل العاكس.", tip: "إذا استمر الخلل، اتصل بالدعم الفني." },
+                    { code: "28", description: "خطأ في قراءة EE (1)", solution: "أعد تشغيل العاكس.", tip: "قد يكون بسبب تلف في الذاكرة." },
+                    { code: "29", description: "خطأ في قراءة EE (2)", solution: "أعد تشغيل العاكس.", tip: "قد يكون بسبب تلف في الذاكرة." },
+                    { code: "2A", description: "خطأ في قراءة EE (3)", solution: "أعد تشغيل العاكس.", tip: "قد يكون بسبب تلف في الذاكرة." },
+                    { code: "2B", description: "حمل زائد على العاكس", solution: "قلل الحمل.", tip: "قد يكون بسبب توصيل أحمال كبيرة جدًا." },
+                    { code: "2C", description: "تعارض في معاملات التيار المستمر", solution: "تحقق من إعدادات البطارية والألواح.", tip: "قد يكون بسبب خطأ في الإعدادات." },
+                    { code: "38", description: "ارتفاع جهد التيار المستمر", solution: "افصل الطاقة، تحقق من جهد الألواح. بعد زوال العطل، أعد تشغيل العاكس.", tip: "تأكد من أن جهد الألواح لا يتجاوز الحد الأقصى." },
+                    { code: "39", description: "انخفاض جهد التيار المستمر", solution: "افصل الطاقة، تحقق من جهد الألواح. بعد زوال العطل، أعد تشغيل العاكس.", tip: "قد يكون بسبب ضعف الإشعاع الشمسي." },
+                    { code: "3A", description: "خطأ في تأريض التيار المستمر", solution: "تحقق من كابل التأريض للعاكس.", tip: "افحص الألواح: قد يكون هناك تسرب تيار." },
+                    { code: "3B", description: "فشل في نظام إدارة البطارية (BMS)", solution: "تحقق من توصيلات BMS وإعداداته.", tip: "قد يكون بسبب خطأ في BMS نفسه." },
+                    { code: "3C", description: "انتهاء مهلة اتصال BMS", solution: "تحقق من كابل الاتصال بين BMS والعاكس.", tip: "قد يكون بسبب قطع في الاتصال." },
+                    { code: "3D", description: "انتهاء مهلة اتصال EMS", solution: "تحقق من كابل الاتصال بين EMS والعاكس.", tip: "قد يكون بسبب قطع في الاتصال." },
+                    { code: "40", description: "فشل البدء الناعم للتيار المستمر", solution: "أعد تشغيل العاكس.", tip: "إذا استمر الخلل، اتصل بالدعم الفني." },
+                    { code: "41", description: "ماس كهربائي في مرحل التيار المستمر", solution: "افصل الطاقة، تحقق من توصيلات التيار المستمر. بعد زوال العطل، أعد تشغيل العاكس.", tip: "قد يكون بسبب عطل في المرحل." },
+                    { code: "42", description: "دائرة مفتوحة في مرحل التيار المستمر", solution: "افصل الطاقة، تحقق من مرحل التيار المستمر. بعد زوال العطل، أعد تشغيل العاكس.", tip: "قد يكون بسبب عطل في المرحل." },
+                    { code: "43", description: "انتهاء مهلة الحمل الزائد للتيار المستمر", solution: "قلل الحمل.", tip: "قد يكون بسبب سحب تيار كبير جدًا." },
+                    { code: "44", description: "فشل البدء الناعم للحافلة", solution: "أعد تشغيل العاكس.", tip: "إذا استمر الخلل، اتصل بالدعم الفني." },
+                    { code: "45", description: "تيار زائد في الفحص السريع للتيار المستمر", solution: "أعد تشغيل العاكس.", tip: "إذا استمر الخلل، اتصل بالدعم الفني." },
+                    { code: "48", description: "تيار زائد", solution: "أعد تشغيل العاكس.", tip: "إذا استمر الخلل، اتصل بالدعم الفني." },
+                    { code: "90", description: "خطأ في إعداد المعاملات", solution: "تحقق من إعدادات المعاملات.", tip: "قد يكون بسبب خطأ في الإعدادات." },
+                    { code: "91", description: "طاقة منخفضة في وضع عدم ربط الشبكة", solution: "اشحن البطارية.", tip: "قد يكون بسبب نفاد طاقة البطارية." },
+                    { code: "92", description: "فصل الخط المحايد", solution: "تحقق من توصيل الخط المحايد.", tip: "قد يكون بسبب عدم توصيل الخط المحايد بشكل صحيح." },
+                    { code: "93", description: "ارتفاع جهد الحافلة في وضع الاستعداد", solution: "افصل الطاقة، تحقق من جهد البطارية والألواح. بعد زوال العطل، أعد تشغيل العاكس.", tip: "قد يكون بسبب ارتفاع جهد البطارية." },
+                    { code: "95", description: "زيادة معدل تغير التردد", solution: "افصل الطاقة، تحقق من تردد الشبكة. بعد زوال العطل، أعد تشغيل العاكس.", tip: "قد يكون بسبب عدم استقرار الشبكة." },
+                    { code: "96", description: "تغير سريع في زاوية طور الشبكة", solution: "افصل الطاقة، تحقق من زاوية طور الشبكة. بعد زوال العطل، أعد تشغيل العاكس.", tip: "قد يكون بسبب عدم استقرار الشبكة." }
+                ],
+                voltronic: [
+                    { code: "01", description: "المروحة محشورة أو لا تعمل (Fan Fault)", solution: "افصل الطاقة، وتأكد من عدم وجود عوائق ميكانيكية تمنع دوران المروحة. يمكنك محاولة تنظيفها.", tip: "إذا لم تتحسن الحالة بعد التنظيف، فمن المحتمل أن تحتاج المروحة إلى الاستبدال." },
+                    { code: "02", description: "ارتفاع درجة حرارة الجهاز (Over Temperature)", solution: "تأكد من عدم انسداد فتحات التهوية، ومن أن درجة حرارة الغرفة ضمن الحدود الطبيعية. تأكد من أن تدفق الهواء حول الجهاز جيد.", tip: "إذا تكررت المشكلة، قد يكون هناك حمل زائد على الجهاز أو عطل في مراوح التبريد." },
+                    { code: "03", description: "جهد البطارية مرتفع جدًا (Battery Voltage Too High)", solution: "افصل الجهاز فورًا عن البطاريات. تحقق من مواصفات البطاريات واعدادات الشحن في الجهاز.", tip: "قد يكون السبب هو استخدام عدد بطاريات غير مناسب أو عطل في منظم الشحن الداخلي." },
+                    { code: "04", description: "جهد البطارية منخفض جدًا (Battery Voltage Too Low)", solution: "قم بشحن البطارية. افحص توصيلات البطارية وتأكد من أنها مثبتة بشكل جيد.", tip: "قد يكون السبب هو تلف البطارية أو تجاوزها لعمرها الافتراضي." },
+                    { code: "05", description: "ماس كهربائي في الخرج أو ارتفاع حرارة داخلي (Output Short / Internal Overtemp)", solution: "افصل جميع الأحمال عن الجهاز وتأكد من عدم وجود قصر في توصيلات الخرج. أعد تشغيل الجهاز.", tip: "إذا ظهر الخطأ بدون أي حمل، فهذا يشير غالبًا إلى عطل داخلي في الجهاز." },
+                    { code: "06", description: "جهد الخرج غير طبيعي أو منخفض جدًا (Output Voltage Abnormal / Too Low)", solution: "تحقق من التوصيلات ومن قيم جهد الخرج. قد تحتاج إلى تقليل الأحمال.", tip: "في بعض الحالات، يشير هذا الخطأ إلى وجود حمل زائد أو عطل داخلي في معالج الجهد." },
+                    { code: "07", description: "الحمل زائد عن القدرة (Overload Timeout)", solution: "قم بتقليل كمية الأجهزة المتصلة بالجهاز.", tip: "لقد تجاوز الحمل القدرة المقننة للجهاز لفترة أطول من المسموح." },
+                    { code: "08", description: "جهد حافلة التيار المستمر مرتفع جدًا (Bus Voltage Too High)", solution: "أعد تشغيل الجهاز. إذا تكرر الخطأ، فيرجى الاتصال بمركز الصيانة.", tip: "قد يشير هذا الخطأ إلى عطل في لوحة الطاقة الرئيسية." },
+                    { code: "09", description: "فشل البدء الناعم لحافلة التيار المستمر (Bus Soft Start Failed)", solution: "أعد تشغيل الجهاز. إذا ظل الخطأ قائمًا، فيرجى طلب خدمة الصيانة.", tip: "قد يكون ناتجًا عن عطل في دارة بدء التشغيل." },
+                    { code: "11", description: "فشل مرحل رئيسي (Main Relay Failed)", solution: "أعد تشغيل الجهاز. إذا استمرت المشكلة، يرجى الاتصال بالدعم الفني.", tip: "يشير هذا الخطأ إلى وجود عطل في المُرحّلات الداخلية." },
+                    { code: "51", description: "تيار زائد أو موجة مفاجئة (Over Current or Surge)", solution: "افصل الجهاز عن مصدر الطاقة والأحمال، ثم أعد تشغيله. قد تحتاج إلى تقليل الأحمال.", tip: "قد يكون بسبب تشغيل أجهزة ذات تيارات بدء عالية (مثل المضخات والمحركات)." },
+                    { code: "52", description: "جهد حافلة التيار المستمر منخفض جدًا (Bus Voltage Too Low)", solution: "أعد شحن البطارية وتأكد من أن جهدها ضمن المجال الطبيعي. افحص وصلات البطارية.", tip: "قد يكون هذا الخطأ ناتجًا عن انخفاض شديد في جهد البطارية." },
+                    { code: "53", description: "فشل البدء الناعم للانفيرتر (Inverter Soft Start Failed)", solution: "أعد تشغيل الجهاز. إذا تكرر الخطأ، يرجى الاتصال بمركز الخدمة.", tip: "عطل داخلي محتمل في دارة بدء تشغيل الانفيرتر." },
+                    { code: "55", description: "جهد تيار مستمر زائد في خرج التيار المتردد (Over DC Voltage in AC Output)", solution: "قم بإعادة تشغيل الجهاز، وإذا ظهر الخطأ مجددًا، يرجى الاتصال بمركز الإصلاح.", tip: "هذا خطير وقد يشير إلى عطل كبير في مكونات الطاقة ويجب فحصه بواسطة فني." },
+                    { code: "56", description: "البطارية غير موصولة بشكل جيد أو انفجر المصهور (Battery Connection Fault)", solution: "افحص أسلاك البطارية وتأكد من أنها مثبتة بشكل محكم. افحص المصهورات الداخلية.", tip: "قد يكون السبب هو تآكل في أطراف التوصيل." },
+                    { code: "57", description: "فشل حساس التيار (Current Sensor Failed)", solution: "إذا ظهر هذا الخطأ، يرجى الاتصال بمركز الصيانة لاستبدال الحساس.", tip: "عطل في حساس قياس التيار، مما يمنع الجهاز من قراءة التيار بشكل صحيح." },
+                    { code: "58", description: "جهد الخرج منخفض جدًا (Output Voltage Too Low)", solution: "أعد تشغيل الجهاز. قد تحتاج إلى تقليل الأحمال.", tip: "لاحظ أن هذا يختلف عن الكود 59 الذي يخص جهد الألواح الشمسية." },
+                    { code: "59", description: "جهد الألواح الشمسية مرتفع عن الحد المسموح (PV Voltage Over Limit)", solution: "افصل الألواح الشمسية فورًا. قلل عدد الألواح المتصلة على التوالي.", tip: "تأكد من أن أقصى جهد دارة مفتوحة (Voc) للألواح لا يتجاوز الحد الأقصى المدعوم من الجهاز." },
+                    { code: "F01", description: "عطل في المروحة (Fan fault)", solution: "افحص المروحة باستخدام الفولتميتر. إذا كانت لا تعمل، فيجب استبدالها.", tip: "تعمل هذه الأكواد في الغالب بنفس طريقة عمل الأكواد الرقمية (01,02...)، لكنها تظهر بشكل منفصل في بعض الطرازات." },
+                    { code: "F02", description: "ارتفاع حرارة الجهاز أو ارتفاع جهد الألواح الشمسية (Over temp or High PV-volt)", solution: "قم بتهوية الجهاز وإزالة أي عوائق. تأكد من أن جهد الألواح أقل من 450 فولت.", tip: "إذا ظهر الخطأ عند تشغيل الألواح، فهو متعلق بالجهد، أما في الأوقات العادية فهو متعلق بالحرارة." },
+                    { code: "F03", description: "جهد البطارية مرتفع جدًا (Battery voltage is too high)", solution: "افصل التيار الكهربائي والألواح الشمسية. تحقق من توصيلات البطارية ومن إعدادات الشحن.", tip: "قد يكون هناك عطل في منظم الشحن المسؤول عن البطاريات." },
+                    { code: "F05", description: "ماس كهربائي في الخرج أو سخونة داخلية (Output short or Over temp)", solution: "افصل الأحمال وتأكد من عدم وجود ماس في التوصيلات. أعد تشغيل الجهاز.", tip: "إذا ظهر هذا الخطأ بدون أي حمل، فهذا يعني وجود عطل كهربائي داخلي يجب إصلاحه." },
+                    { code: "F06", description: "جهد الخرج غير طبيعي (Output voltage abnormal)", solution: "اختبر خرج التيار المتردد بواسطة الفولتميتر. قد يكون الحمل زائدًا عن الحد.", tip: "في حالة تكرار العطل، يرجى الاتصال بالدعم الفني لعمل المعايرة اللازمة." },
+                    { code: "F07", description: "الحمل زائد وانتهى الوقت المسموح (Over load time out)", solution: "قم بإزالة بعض الأحمال عن الجهاز لتخفيف الحمل.", tip: "تأكد من أن إجمالي قدرة الأجهزة المتصلة أقل من قدرة الجهاز." },
+                    { code: "F08", description: "جهد ناقل التيار المستمر مرتفع (Bus voltage high)", solution: "أعد تشغيل الجهاز. إذا لم يختفي الخطأ، سيتم الاتصال بمركز الصيانة.", tip: "قد يكون ناتجًا عن خلل في دارة رفع الجهد الداخلية (Boost Converter)." },
+                    { code: "F09", description: "فشل البدء الناعم لناقل التيار (Bus soft start fail)", solution: "أعد تشغيل الجهاز. إذا تكرر الخطأ، يرجى الاتصال بالصيانة.", tip: "ربما هناك عطل في دارة بدء التشغيل الناعمة لمنع التيارات المفاجئة." },
+                    { code: "F11", description: "فشل المرحل الرئيسي (Main relay failed)", solution: "أعد تشغيل الجهاز. إذا استمرت المشكلة، يجب الاتصال بالفني.", tip: "يحتوي الجهاز على مرحلات داخلية تفصل وتصل المصادر، وهذا العطل يشير إلى خلل في أحدها." }
                 ]
+
+                
             };
 
-            // DOM Elements
-            const brandSelectNative = document.getElementById('brandSelect'); // hidden, kept for compatibility? no we use custom
+            // ===================== دوال مساعدة =====================
+
+            // تجميع كل الأخطاء من جميع الماركات
+            function getAllErrors() {
+                const allErrors = [];
+                Object.keys(errorDatabase).forEach(brandKey => {
+                    errorDatabase[brandKey].forEach(err => {
+                        allErrors.push({
+                            ...err,
+                            brand: brandKey
+                        });
+                    });
+                });
+                return allErrors;
+            }
+
+            // الحصول على إحصائيات قاعدة البيانات
+            function getDatabaseStats() {
+                const stats = {};
+                let total = 0;
+                Object.keys(errorDatabase).forEach(brand => {
+                    const count = errorDatabase[brand].length;
+                    stats[brand] = count;
+                    total += count;
+                });
+                return { stats, total };
+            }
+
+            // تحديث تذييل الصفحة بالإحصائيات
+            function updateFooterStats() {
+                const { stats, total } = getDatabaseStats();
+                const brandsCount = Object.keys(errorDatabase).length;
+                document.getElementById('footerStats').innerHTML =
+                    `${brandsCount} ماركات | ${total} رمز خطأ | محدثة باستمرار`;
+            }
+
+            // عرض إحصائيات الماركات في الصفحة الرئيسية
+            function displayBrandStats() {
+                const { stats, total } = getDatabaseStats();
+                const brandStatsDiv = document.getElementById('brandStats');
+                let html = '';
+
+                Object.keys(brandConfig).forEach(brand => {
+                    if (brand !== 'all') {
+                        const count = stats[brand] || 0;
+                        const config = brandConfig[brand];
+                        html += `
+                            <div class="brand-stat-item">
+                                <i class="fas ${config.icon}" style="color: ${config.color};"></i>
+                                <span>${config.name}: ${count} خطأ</span>
+                            </div>
+                        `;
+                    }
+                });
+
+                brandStatsDiv.innerHTML = html;
+            }
+
+            // ===================== عناصر DOM =====================
             const customSelect = document.getElementById('brandCustomSelect');
             const selectSelected = document.getElementById('selectSelected');
             const selectItemsDiv = document.getElementById('selectItems');
@@ -570,10 +764,78 @@
             const suggestionsBox = document.getElementById('suggestionsBox');
             const backHomeBtn = document.getElementById('backHomeBtn');
 
-            let currentBrand = 'all'; // 'all' or 'deye'
-            let allErrors = errorDatabase.deye; // flat array for search
+            let currentBrand = 'all';
 
-            // --- Custom Select Logic ---
+            // ===================== بناء القائمة المنسدلة ديناميكياً =====================
+            function buildBrandDropdown() {
+                let html = `<div class="select-item" data-value="all">${brandConfig.all.name} <i class="fas ${brandConfig.all.icon}" style="margin-right: 8px;"></i></div>`;
+
+                Object.keys(errorDatabase).forEach(brandKey => {
+                    const config = brandConfig[brandKey] || {
+                        name: brandKey.toUpperCase(),
+                        icon: 'fa-microchip',
+                        color: '#6B7280'
+                    };
+                    html += `<div class="select-item" data-value="${brandKey}">${config.name} <i class="fas ${config.icon}" style="margin-right: 8px; color: ${config.color};"></i></div>`;
+                });
+
+                selectItemsDiv.innerHTML = html;
+
+                // إعادة ربط الأحداث
+                document.querySelectorAll('.select-item').forEach(item => {
+                    item.addEventListener('click', function (e) {
+                        const value = this.dataset.value;
+                        currentBrand = value;
+
+                        const config = brandConfig[value] || { name: value.toUpperCase() };
+                        selectedBrandText.textContent = config.name;
+
+                        document.querySelectorAll('.select-item').forEach(el => el.classList.remove('selected-active'));
+                        this.classList.add('selected-active');
+
+                        toggleSelectDropdown(false);
+
+                        // إعادة تعيين النتائج
+                        if (value === 'all') {
+                            resultsArea.innerHTML = `
+                                <div class="no-results">
+                                    <i class="fas fa-search" style="font-size: 2rem; margin-bottom: 12px; display: block;"></i>
+                                    <p>اختر ماركة أو اكتب رمز خطأ للبحث</p>
+                                    <div class="brand-stats" id="brandStats"></div>
+                                </div>
+                            `;
+                            displayBrandStats();
+                        } else {
+                            const count = errorDatabase[value]?.length || 0;
+                            resultsArea.innerHTML = `
+                                <div class="no-results">
+                                    <i class="fas ${config.icon}" style="font-size: 2rem; margin-bottom: 12px; display: block; color: ${config.color};"></i>
+                                    <p>${config.name}</p>
+                                    <p style="font-size: 0.85rem; margin-top: 8px;">${count} رمز خطأ متاح</p>
+                                    <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 16px;">اكتب رمز الخطأ للبحث</p>
+                                </div>
+                            `;
+                        }
+
+                        suggestionsBox.style.display = 'none';
+                        errorInput.value = '';
+                        errorInput.placeholder = `مثال: ${getExampleCode(value)}`;
+                    });
+                });
+            }
+
+            // الحصول على مثال لرمز خطأ من الماركة
+            function getExampleCode(brand) {
+                if (brand === 'all') return 'F07 , VE01 , E001';
+                const errors = errorDatabase[brand];
+                if (errors && errors.length > 0) {
+                    const examples = errors.slice(0, 3).map(e => e.code).join(' , ');
+                    return examples;
+                }
+                return 'F07';
+            }
+
+            // ===================== القائمة المنسدلة =====================
             function toggleSelectDropdown(show) {
                 if (show) selectItemsDiv.classList.add('show');
                 else selectItemsDiv.classList.remove('show');
@@ -584,34 +846,20 @@
                 toggleSelectDropdown(!selectItemsDiv.classList.contains('show'));
             });
 
-            document.querySelectorAll('.select-item').forEach(item => {
-                item.addEventListener('click', function (e) {
-                    const value = this.dataset.value;
-                    currentBrand = value;
-                    let displayText = value === 'all' ? 'جميع الماركات' : 'Deye (انفرترات هجين / ربط شبكي)';
-                    selectedBrandText.textContent = displayText;
-
-                    // Update active class
-                    document.querySelectorAll('.select-item').forEach(el => el.classList.remove('selected-active'));
-                    this.classList.add('selected-active');
-
-                    toggleSelectDropdown(false);
-
-                    // Clear results and suggestions
-                    resultsArea.innerHTML = `<div class="no-results"><i class="fas fa-search" style="font-size: 2rem; margin-bottom: 12px; display: block;"></i><p>اختر ماركة أو اكتب رمز خطأ للبحث</p></div>`;
-                    suggestionsBox.style.display = 'none';
-                    errorInput.value = '';
-                });
-            });
-
             window.addEventListener('click', () => toggleSelectDropdown(false));
 
-            // --- Search & Suggestions ---
+            // ===================== الاقتراحات =====================
             function getFilteredSuggestions(query) {
                 if (!query) return [];
                 const upperQuery = query.toUpperCase();
-                const source = currentBrand === 'all' ? allErrors : errorDatabase[currentBrand] || [];
-                return source.filter(err => err.code.includes(upperQuery)).map(err => err.code);
+                const allErrors = getAllErrors();
+
+                const source = currentBrand === 'all'
+                    ? allErrors
+                    : allErrors.filter(err => err.brand === currentBrand);
+
+                const uniqueCodes = [...new Set(source.map(err => err.code))];
+                return uniqueCodes.filter(code => code.includes(upperQuery)).slice(0, 10);
             }
 
             function showSuggestions(suggestions) {
@@ -619,10 +867,19 @@
                     suggestionsBox.style.display = 'none';
                     return;
                 }
+
                 let html = '';
                 suggestions.forEach(code => {
-                    html += `<div class="suggestion-item" data-code="${code}">${code}</div>`;
+                    const errorInfo = findErrorByCode(code);
+                    const brandName = errorInfo ? brandConfig[errorInfo.brand]?.name || errorInfo.brand : '';
+                    html += `
+                        <div class="suggestion-item" data-code="${code}">
+                            <strong>${code}</strong>
+                            <span style="font-size: 0.7rem; color: var(--text-secondary); margin-right: 8px;">${brandName}</span>
+                        </div>
+                    `;
                 });
+
                 suggestionsBox.innerHTML = html;
                 suggestionsBox.style.display = 'block';
 
@@ -633,6 +890,11 @@
                         performSearch();
                     });
                 });
+            }
+
+            function findErrorByCode(code) {
+                const allErrors = getAllErrors();
+                return allErrors.find(err => err.code === code);
             }
 
             errorInput.addEventListener('input', (e) => {
@@ -648,60 +910,85 @@
                 }
             });
 
-            // Close suggestions on outside click
             document.addEventListener('click', (e) => {
                 if (!e.target.closest('.search-wrapper')) {
                     suggestionsBox.style.display = 'none';
                 }
             });
 
-            // --- Search Logic ---
+            // ===================== البحث =====================
             function performSearch() {
                 const query = errorInput.value.trim().toUpperCase();
                 const brand = currentBrand;
 
                 let source = [];
-                if (brand === 'all') source = allErrors;
-                else if (brand === 'deye') source = errorDatabase.deye;
+
+                if (brand === 'all') {
+                    source = getAllErrors();
+                } else {
+                    source = (errorDatabase[brand] || []).map(err => ({ ...err, brand: brand }));
+                }
 
                 if (!query) {
-                    resultsArea.innerHTML = `<div class="no-results"><i class="fas fa-info-circle" style="font-size: 2rem; margin-bottom: 12px; display: block;"></i><p>أدخل رمز خطأ للبحث</p></div>`;
+                    resultsArea.innerHTML = `
+                        <div class="no-results">
+                            <i class="fas fa-info-circle" style="font-size: 2rem; margin-bottom: 12px; display: block;"></i>
+                            <p>أدخل رمز خطأ للبحث</p>
+                        </div>
+                    `;
                     return;
                 }
 
-                // Exact matches
                 const exactMatches = source.filter(err => err.code === query);
-                // Similar matches (includes query but not exact)
                 const similarMatches = source.filter(err => err.code.includes(query) && err.code !== query);
 
                 let html = '';
+
                 if (exactMatches.length > 0 || similarMatches.length > 0) {
                     html += `<div class="results-scroll-container">`;
 
                     if (exactMatches.length > 0) {
-                        html += `<div class="section-divider"><i class="fas fa-check-circle"></i> نتائج مطابقة</div>`;
-                        exactMatches.forEach(err => html += generateCardHTML(err));
+                        html += `<div class="section-divider"><i class="fas fa-check-circle"></i> نتائج مطابقة (${exactMatches.length})</div>`;
+                        exactMatches.forEach(err => {
+                            const config = brandConfig[err.brand] || { name: err.brand.toUpperCase(), icon: 'fa-microchip' };
+                            html += generateCardHTML(err, config);
+                        });
                     }
 
                     if (similarMatches.length > 0) {
-                        html += `<div class="section-divider"><i class="fas fa-search"></i> نتائج مشابهة</div>`;
-                        similarMatches.forEach(err => html += generateCardHTML(err));
+                        html += `<div class="section-divider"><i class="fas fa-search"></i> نتائج مشابهة (${similarMatches.length})</div>`;
+                        similarMatches.forEach(err => {
+                            const config = brandConfig[err.brand] || { name: err.brand.toUpperCase(), icon: 'fa-microchip' };
+                            html += generateCardHTML(err, config);
+                        });
                     }
 
                     html += `</div>`;
                     resultsArea.innerHTML = html;
                 } else {
-                    resultsArea.innerHTML = `<div class="no-results"><i class="fas fa-exclamation-circle" style="font-size: 2rem; margin-bottom: 12px;"></i><p>لا توجد نتائج للرمز "${query}"</p></div>`;
+                    const brandDisplayName = brand === 'all' ? 'جميع الماركات' : brandConfig[brand]?.name || brand;
+                    resultsArea.innerHTML = `
+                        <div class="no-results">
+                            <i class="fas fa-exclamation-circle" style="font-size: 2.5rem; margin-bottom: 16px; color: var(--warning);"></i>
+                            <p style="font-size: 1.1rem; margin-bottom: 8px;">لا توجد نتائج للرمز "${query}"</p>
+                            <p style="font-size: 0.85rem; color: var(--text-secondary);">في ${brandDisplayName}</p>
+                            <div style="margin-top: 20px; padding: 12px; background: var(--surface-light); border-radius: 16px;">
+                                <i class="fas fa-lightbulb" style="color: var(--primary);"></i>
+                                <span style="font-size: 0.85rem;">جرب البحث برمز آخر أو اختر "جميع الماركات"</span>
+                            </div>
+                        </div>
+                    `;
                 }
+
                 suggestionsBox.style.display = 'none';
             }
 
-            function generateCardHTML(err) {
+            function generateCardHTML(err, brandConfigData) {
                 return `
                 <div class="result-card">
                     <div class="result-header">
                         <span class="error-code">${err.code}</span>
-                        <span class="brand-badge"><i class="fas fa-solar-panel"></i> Deye</span>
+                        <span class="brand-badge"><i class="fas ${brandConfigData.icon || 'fa-microchip'}"></i> ${brandConfigData.name}</span>
                     </div>
                     <div class="error-description">
                         <i class="fas fa-exclamation-circle" style="color: var(--warning); margin-left: 6px;"></i>${err.description}
@@ -721,16 +1008,30 @@
 
             searchBtn.addEventListener('click', performSearch);
 
+            // ===================== التهيئة الأولية =====================
+            function initialize() {
+                buildBrandDropdown();
+
+                // تعيين القيمة الافتراضية
+                document.querySelector('.select-item[data-value="all"]').classList.add('selected-active');
+                selectedBrandText.textContent = brandConfig.all.name;
+                currentBrand = 'all';
+
+                // تحديث الإحصائيات
+                updateFooterStats();
+                displayBrandStats();
+
+                // تعيين مثال placeholder
+                errorInput.placeholder = `مثال: F07 , VE01 , E001`;
+            }
+
+            initialize();
+
             backHomeBtn.addEventListener('click', () => {
-                window.location.href = 'index.html';
+                window.location.href = 'main.html';
             });
 
-            // Init: set default selected
-            document.querySelector('.select-item[data-value="all"]').classList.add('selected-active');
-            selectedBrandText.textContent = 'جميع الماركات';
-            currentBrand = 'all';
-
-            // Prevent context menu
+            // منع القائمة المنبثقة
             document.addEventListener('contextmenu', e => e.preventDefault());
 
         })();

@@ -4,7 +4,7 @@
   "description": "تطبيق كيو سولار | أدوات مساعدة في مجال الطاقة الشمسية مقدم من قدور كروب",
   "start_url": "/Q-solar",
   "display": "standalone",
-  "background_color": "#DC8623",
+  "background_color": "#111827",
   "theme_color": "#DC8623",
   "icons": [
     {

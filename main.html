@@ -554,7 +554,7 @@
                 calculatorMsg: "اداة المصمم الشمسي ",
                 cablesizerMsg:"حساب مقطع الكابل",
                 batterytimeMsg:"حاسبة الوقت اللازم لشحن البطارية",
-                guideMsg: " دليل الاعطال ",
+                guideMsg: "  دليل اعطال الانفرترات ",
                 deviceSelectTitle: "اختر جهازاً للتحقق",
                 statusFailed: " غير معتمد",
                 statusSuccess: "✓ معتمد",
@@ -1020,7 +1020,7 @@
                     `;
             } else if(activeTab === "guide") {
                 viewContainer.innerHTML = `<a href="error-guide.html" class="btn-primary" style="display: flex; padding: 14px 32px; text-decoration: none; color:unset; ">
-                <div class="calculator-placeholder"><i class="fas fa-network-wired" style="font-size: 48px; color: var(--primary); margin-bottom: 16px; display: block;"></i><p style="font-size:16px">${t("guideMsg")}</p>
+                <div class="calculator-placeholder"><i class="fas fa-book-open" style="font-size: 48px; color: var(--primary); margin-bottom: 16px; display: block;"></i><p style="font-size:16px">${t("guideMsg")}</p>
                     </div></a>`;
             } else if(activeTab === "history") {
                 renderHistoryView(viewContainer);
