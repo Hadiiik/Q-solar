@@ -2,7 +2,7 @@
   "name": "QSolar | Solar System Tools By Qaddour Group",
   "short_name": "QSolar",
   "description": "تطبيق كيو سولار | أدوات مساعدة في مجال الطاقة الشمسية مقدم من قدور كروب",
-  "start_url": "/Q-solar",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#111827",
   "theme_color": "#DC8623",
